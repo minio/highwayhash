@@ -1,0 +1,152 @@
+// Copyright (c) 2017 Minio Inc. All rights reserved.
+// Use of this source code is governed by a license that can be
+// found in the LICENSE file.
+
+package highwayhash
+
+import (
+	"encoding/binary"
+)
+
+var (
+	init0 = [4]uint64{0xdbe6d5d5fe4cce2f, 0xa4093822299f31d0, 0x13198a2e03707344, 0x243f6a8885a308d3}
+	init1 = [4]uint64{0x3bd39e10cb0ef593, 0xc0acf169b5f18a8c, 0xbe5466cf34e90c6c, 0x452821e638d01377}
+)
+
+func initializeGeneric(state *[16]uint64, k []byte) {
+	var key [4]uint64
+
+	key[0] = binary.LittleEndian.Uint64(k[0:])
+	key[1] = binary.LittleEndian.Uint64(k[8:])
+	key[2] = binary.LittleEndian.Uint64(k[16:])
+	key[3] = binary.LittleEndian.Uint64(k[24:])
+
+	copy(state[8:], init0[:])
+	copy(state[12:], init1[:])
+
+	for i, k := range key {
+		state[i] = init0[i] ^ k
+	}
+
+	key[0] = key[0]>>32 | key[0]<<32
+	key[1] = key[1]>>32 | key[1]<<32
+	key[2] = key[2]>>32 | key[2]<<32
+	key[3] = key[3]>>32 | key[3]<<32
+
+	for i, k := range key {
+		state[i+4] = init1[i] ^ k
+	}
+}
+
+func updateGeneric(state *[16]uint64, msg []byte) {
+	for len(msg) > 0 {
+		state[0+4] += binary.LittleEndian.Uint64(msg)
+		state[0+4] += state[8+0]
+		t1 := uint32(state[0+4])
+		state[0+8] ^= uint64(t1) * (state[0] >> 32)
+		state[0] += state[0+12]
+		t0 := uint32(state[0])
+		state[0+12] ^= uint64(t0) * (state[0+4] >> 32)
+
+		state[1+4] += binary.LittleEndian.Uint64(msg[8:])
+		state[1+4] += state[8+1]
+		t1 = uint32(state[1+4])
+		state[1+8] ^= uint64(t1) * (state[1] >> 32)
+		state[1] += state[1+12]
+		t0 = uint32(state[1])
+		state[1+12] ^= uint64(t0) * (state[1+4] >> 32)
+
+		state[2+4] += binary.LittleEndian.Uint64(msg[16:])
+		state[2+4] += state[8+2]
+		t1 = uint32(state[2+4])
+		state[2+8] ^= uint64(t1) * (state[2] >> 32)
+		state[2] += state[2+12]
+		t0 = uint32(state[2])
+		state[2+12] ^= uint64(t0) * (state[2+4] >> 32)
+
+		state[3+4] += binary.LittleEndian.Uint64(msg[24:])
+		state[3+4] += state[8+3]
+		t1 = uint32(state[3+4])
+		state[3+8] ^= uint64(t1) * (state[3] >> 32)
+		state[3] += state[3+12]
+		t0 = uint32(state[3])
+		state[3+12] ^= uint64(t0) * (state[3+4] >> 32)
+
+		zipperMerge(state[4+0], state[4+1], &state[0], &state[1])
+		zipperMerge(state[4+2], state[4+3], &state[2], &state[3])
+
+		zipperMerge(state[0], state[1], &state[4+0], &state[4+1])
+		zipperMerge(state[2], state[3], &state[4+2], &state[4+3])
+		msg = msg[32:]
+	}
+}
+
+func finalizeGeneric(out []byte, state *[16]uint64) {
+	var perm [4]uint64
+	var tmp [32]byte
+	for i := 0; i < 4; i++ {
+		perm[0] = state[2]>>32 | state[2]<<32
+		perm[1] = state[3]>>32 | state[3]<<32
+		perm[2] = state[0]>>32 | state[0]<<32
+		perm[3] = state[1]>>32 | state[1]<<32
+
+		binary.LittleEndian.PutUint64(tmp[0:], perm[0])
+		binary.LittleEndian.PutUint64(tmp[8:], perm[1])
+		binary.LittleEndian.PutUint64(tmp[16:], perm[2])
+		binary.LittleEndian.PutUint64(tmp[24:], perm[3])
+
+		update(state, tmp[:])
+	}
+
+	switch len(out) {
+	case 8:
+		binary.LittleEndian.PutUint64(out, state[0]+state[4]+state[8]+state[12])
+	case 16:
+		binary.LittleEndian.PutUint64(out, state[0]+state[6]+state[8]+state[14])
+		binary.LittleEndian.PutUint64(out[8:], state[1]+state[7]+state[9]+state[15])
+	case 32:
+		h0, h1 := reduceMod(state[0]+state[8+0], state[1]+state[8+1], state[4+0]+state[12+0], state[4+1]+state[12+1])
+		binary.LittleEndian.PutUint64(out[0:], h0)
+		binary.LittleEndian.PutUint64(out[8:], h1)
+
+		h0, h1 = reduceMod(state[2]+state[8+2], state[3]+state[8+3], state[4+2]+state[12+2], state[4+3]+state[12+3])
+		binary.LittleEndian.PutUint64(out[16:], h0)
+		binary.LittleEndian.PutUint64(out[24:], h1)
+	}
+}
+
+func zipperMerge(v0, v1 uint64, d0, d1 *uint64) {
+	m0 := v0 & (0xFF << (2 * 8))
+	m1 := (v1 & (0xFF << (7 * 8))) >> 8
+	m2 := ((v0 & (0xFF << (5 * 8))) + (v1 & (0xFF << (6 * 8)))) >> 16
+	m3 := ((v0 & (0xFF << (3 * 8))) + (v1 & (0xFF << (4 * 8)))) >> 24
+	m4 := (v0 & (0xFF << (1 * 8))) << 32
+	m5 := v0 << 56
+
+	*d0 += m0 + m1 + m2 + m3 + m4 + m5
+
+	m0 = (v0 & (0xFF << (7 * 8))) + (v1 & (0xFF << (2 * 8)))
+	m1 = (v0 & (0xFF << (6 * 8))) >> 8
+	m2 = (v1 & (0xFF << (5 * 8))) >> 16
+	m3 = ((v1 & (0xFF << (3 * 8))) + (v0 & (0xFF << (4 * 8)))) >> 24
+	m4 = (v1 & 0xFF) << 48
+	m5 = (v1 & (0xFF << (1 * 8))) << 24
+
+	*d1 += m3 + m2 + m5 + m1 + m4 + m0
+}
+
+// reduce v = [v0, v1, v2, v3] mod the irreducible polynomial x^128 + x^2 + x
+func reduceMod(v0, v1, v2, v3 uint64) (r0, r1 uint64) {
+	v3 &= 0x3FFFFFFFFFFFFFFF
+
+	r0, r1 = v2, v3
+
+	v3 = (v3 << 1) | (v2 >> (64 - 1))
+	v2 <<= 1
+	r1 = (r1 << 2) | (r0 >> (64 - 2))
+	r0 <<= 2
+
+	r0 ^= v0 ^ v2
+	r1 ^= v1 ^ v3
+	return
+}
