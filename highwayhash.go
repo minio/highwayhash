@@ -28,7 +28,7 @@ const (
 var errKeySize = errors.New("highwayhash: invalid key size")
 
 // New returns a hash.Hash computing the HighwayHash-256 checksum.
-// It returns a non-nil error if len(key) != 32.
+// It returns a non-nil error if the key is not 32 bytes long.
 func New(key []byte) (hash.Hash, error) {
 	if len(key) != Size {
 		return nil, errKeySize
@@ -40,7 +40,7 @@ func New(key []byte) (hash.Hash, error) {
 }
 
 // New128 returns a hash.Hash computing the HighwayHash-128 checksum.
-// It returns a non-nil error if len(key) != 32.
+// It returns a non-nil error if the key is not 32 bytes long.
 func New128(key []byte) (hash.Hash, error) {
 	if len(key) != Size {
 		return nil, errKeySize
@@ -52,7 +52,7 @@ func New128(key []byte) (hash.Hash, error) {
 }
 
 // New64 returns a hash.Hash computing the HighwayHash-64 checksum.
-// It returns a non-nil error if len(key) != 32.
+// It returns a non-nil error if the key is not 32 bytes long.
 func New64(key []byte) (hash.Hash64, error) {
 	if len(key) != Size {
 		return nil, errKeySize
@@ -65,7 +65,7 @@ func New64(key []byte) (hash.Hash64, error) {
 }
 
 // Sum computes the HighwayHash-256 checksum of data.
-// It panics len(key) != 32.
+// It panics if the key is not 32 bytes long.
 func Sum(data, key []byte) [Size]byte {
 	if len(key) != Size {
 		panic(errKeySize)
@@ -87,7 +87,7 @@ func Sum(data, key []byte) [Size]byte {
 }
 
 // Sum128 computes the HighwayHash-128 checksum of data.
-// It panics len(key) != 32.
+// It panics if the key is not 32 bytes long.
 func Sum128(data, key []byte) [Size128]byte {
 	if len(key) != Size {
 		panic(errKeySize)
@@ -109,7 +109,7 @@ func Sum128(data, key []byte) [Size128]byte {
 }
 
 // Sum64 computes the HighwayHash-64 checksum of data.
-// It panics len(key) != 32.
+// It panics if the key is not 32 bytes long.
 func Sum64(data, key []byte) uint64 {
 	if len(key) != Size {
 		panic(errKeySize)
