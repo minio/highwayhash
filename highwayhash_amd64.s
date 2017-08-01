@@ -177,6 +177,7 @@ LOOP:
 DONE:
 	RET
 
+// func finalizeSSE4(out []byte, state *[16]uint64)
 TEXT ·finalizeSSE4(SB), 4, $0-32
 	MOVQ state+24(FP), AX
 	MOVQ out_base+0(FP), BX

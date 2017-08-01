@@ -9,7 +9,7 @@ package highwayhash
 
 var (
 	useSSE4 = supportsSSE4()
-	useAVX2 = supportsAVX2() && false
+	useAVX2 = supportsAVX2()
 )
 
 //go:noescape
@@ -33,6 +33,9 @@ func updateAVX2(state *[16]uint64, msg []byte)
 //go:noescape
 func finalizeSSE4(out []byte, state *[16]uint64)
 
+//go:noescape
+func finalizeAVX2(out []byte, state *[16]uint64)
+
 func initialize(state *[16]uint64, key []byte) {
 	if useAVX2 {
 		initializeAVX2(state, key)
@@ -54,7 +57,9 @@ func update(state *[16]uint64, msg []byte) {
 }
 
 func finalize(out []byte, state *[16]uint64) {
-	if useSSE4 {
+	if useAVX2 {
+		finalizeAVX2(out, state)
+	} else if useSSE4 {
 		finalizeSSE4(out, state)
 	} else {
 		finalizeGeneric(out, state)
