@@ -6,7 +6,7 @@
 HighwayHash is a pseudo-random-function (PRF) developed by Jyrki Alakuijala, Bill Cox and Jan Wassenberg (Google research).
 HighwayHash takes a 256 bit key and computes 64, 128 or 256 bit hash values of given messages. It can be used to prevent hash-flooding
 attacks or authenticate short-lived messages. It can also be used as a fingerprint function.
-This repository provides a native Go and specialist assembly implementations for the AMD64 and ARM64 platforms.  
+This repository provides a native Go and optimized assembly implementations for the AMD64 and ARM64 platforms.  
 
 HighwayHash is not a general purpose cryptographic hash function (like BLAKE2b, SHA-3, SHA-2,...) and cannot be used if (strong) collision
 resistance is required. 
