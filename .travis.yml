@@ -1,16 +1,22 @@
+go_import_path: github.com/minio/highwayhash
+sudo: required
+
+dist: trusty
+
 language: go
 
-go:
-  - 1.7
-  - 1.8
+os:
+- linux
 
 env:
-  - TRAVIS_GOARCH=amd64
-  - TRAVIS_GOARCH=386 
+- ARCH=x86_64
+- ARCH=i686
 
-before_install:
-  - export GOARCH=$TRAVIS_GOARCH
+go:
+- 1.7
+- 1.8
 
-branches:
-  only:
-  - master
+script:
+- diff -au <(gofmt -d .) <(printf "")
+- go vet ./...
+- go test -v ./...
