@@ -25,40 +25,11 @@ Notice that the amd64 AVX2 implementation is only available with Go 1.8 and newe
 
 ### Performance
 
-**AMD64**
-Hardware: Intel i7-6500U 2.50GHz x 2  
-System: Linux Ubuntu 16.04 - kernel: 4.10.0-28-generic  
-Go version: 1.8.3  
-```
-AVX2
-name         speed           cpb
-Write_64-4   4.64GB/s ± 0%    0.50
-Write_1K-4   10.6GB/s ± 0%    0.22
-Write_8K-4   11.7GB/s ± 0%    0.20
-Sum64_8-4     127MB/s ± 0%   18.77
-Sum64_16-4    240MB/s ± 1%    9.93
-Sum64_64-4   1.54GB/s ± 0%    1.51
-Sum64_1K-4   8.13GB/s ± 0%    0.29
-Sum64_8K-4   11.3GB/s ± 0%    0.21 
-Sum256_8-4    111MB/s ± 0%   21.48
-Sum256_16-4   211MB/s ± 1%   11.30
-Sum256_64-4  1.29GB/s ± 0%    1.81
-Sum256_1K-4  7.59GB/s ± 1%    0.31
-Sum256_8K-4  11.1GB/s ± 0%    0.21
+Platform/CPU      | Write 64            | Write 1024           | Sum 64 / cpb        | Sum 1024
+----------------- | ------------------- | -------------------- | ------------------- | ------------------- 
+AMD64 AVX2        | 4.64GB/s / 0.50 cpb | 10.6GB/s / 0.22 cpb  | 1.54GB/s / 1.51 cpb | 8.13GB/s / 0,29 cpb
+AMD64 SSE4.1      | 3.42GB/s / 0.68 cpb | 8.39GB/s / 0.28 cpb  | 1.29GB/s / 1.81 cpb | 6.69GB/s / 0.35 cpb
 
-SSE4.1
-name         speed           cpb
-Write_64-4   3.42GB/s ± 0%    0.68
-Write_1K-4   8.39GB/s ± 0%    0.28
-Write_8K-4   9.60GB/s ± 0%    0.24
-Sum64_8-4     119MB/s ± 1%   20.04
-Sum64_16-4    229MB/s ± 1%   10.41
-Sum64_64-4   1.29GB/s ± 0%    1.81
-Sum64_1K-4   6.69GB/s ± 0%    0.35
-Sum64_8K-4   9.27GB/s ± 0%    0.25
-Sum256_8-4    104MB/s ± 0%   22.93
-Sum256_16-4   203MB/s ± 0%   11.75
-Sum256_64-4  1.08GB/s ± 0%    2.16
-Sum256_1K-4  6.35GB/s ± 0%    0.37
-Sum256_8K-4  9.17GB/s ± 0%    0.25
-```  
+
+**Hardware:**  
+Intel i7-6500U 2.50GHz x 2 | Ubuntu 16.04 - kernel: 4.10.0-28-generic | Go: 1.8.3  
