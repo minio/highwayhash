@@ -38,45 +38,52 @@ func initializeGeneric(state *[16]uint64, k []byte) {
 	}
 }
 
+const (
+	v0   = 0
+	v1   = 4
+	mul0 = 8
+	mul1 = 12
+)
+
 func updateGeneric(state *[16]uint64, msg []byte) {
 	for len(msg) > 0 {
-		state[0+4] += binary.LittleEndian.Uint64(msg)
-		state[0+4] += state[8+0]
-		t1 := uint32(state[0+4])
-		state[0+8] ^= uint64(t1) * (state[0] >> 32)
-		state[0] += state[0+12]
-		t0 := uint32(state[0])
-		state[0+12] ^= uint64(t0) * (state[0+4] >> 32)
+		state[v1+0] += binary.LittleEndian.Uint64(msg)
+		state[v1+0] += state[mul0+0]
+		t1 := uint32(state[v1+0])
+		state[mul0+0] ^= uint64(t1) * (state[v0+0] >> 32)
+		state[v0+0] += state[mul1+0]
+		t0 := uint32(state[v0+0])
+		state[mul1+0] ^= uint64(t0) * (state[v1+0] >> 32)
 
-		state[1+4] += binary.LittleEndian.Uint64(msg[8:])
-		state[1+4] += state[8+1]
-		t1 = uint32(state[1+4])
-		state[1+8] ^= uint64(t1) * (state[1] >> 32)
-		state[1] += state[1+12]
-		t0 = uint32(state[1])
-		state[1+12] ^= uint64(t0) * (state[1+4] >> 32)
+		state[v1+1] += binary.LittleEndian.Uint64(msg[8:])
+		state[v1+1] += state[mul0+1]
+		t1 = uint32(state[v1+1])
+		state[mul0+1] ^= uint64(t1) * (state[v0+1] >> 32)
+		state[v0+1] += state[mul1+1]
+		t0 = uint32(state[v0+1])
+		state[mul1+1] ^= uint64(t0) * (state[v1+1] >> 32)
 
-		state[2+4] += binary.LittleEndian.Uint64(msg[16:])
-		state[2+4] += state[8+2]
-		t1 = uint32(state[2+4])
-		state[2+8] ^= uint64(t1) * (state[2] >> 32)
-		state[2] += state[2+12]
-		t0 = uint32(state[2])
-		state[2+12] ^= uint64(t0) * (state[2+4] >> 32)
+		state[v1+2] += binary.LittleEndian.Uint64(msg[16:])
+		state[v1+2] += state[mul0+2]
+		t1 = uint32(state[v1+2])
+		state[mul0+2] ^= uint64(t1) * (state[v0+2] >> 32)
+		state[v0+2] += state[mul1+2]
+		t0 = uint32(state[v0+2])
+		state[mul1+2] ^= uint64(t0) * (state[v1+2] >> 32)
 
-		state[3+4] += binary.LittleEndian.Uint64(msg[24:])
-		state[3+4] += state[8+3]
-		t1 = uint32(state[3+4])
-		state[3+8] ^= uint64(t1) * (state[3] >> 32)
-		state[3] += state[3+12]
-		t0 = uint32(state[3])
-		state[3+12] ^= uint64(t0) * (state[3+4] >> 32)
+		state[v1+3] += binary.LittleEndian.Uint64(msg[24:])
+		state[v1+3] += state[mul0+3]
+		t1 = uint32(state[v1+3])
+		state[mul0+3] ^= uint64(t1) * (state[v0+3] >> 32)
+		state[v0+3] += state[mul1+3]
+		t0 = uint32(state[v0+3])
+		state[mul1+3] ^= uint64(t0) * (state[v1+3] >> 32)
 
-		zipperMerge(state[4+0], state[4+1], &state[0], &state[1])
-		zipperMerge(state[4+2], state[4+3], &state[2], &state[3])
+		zipperMerge(state[v1+0], state[v1+1], &state[v0+0], &state[v0+1])
+		zipperMerge(state[v1+2], state[v1+3], &state[v0+2], &state[v0+3])
 
-		zipperMerge(state[0], state[1], &state[4+0], &state[4+1])
-		zipperMerge(state[2], state[3], &state[4+2], &state[4+3])
+		zipperMerge(state[v0+0], state[v0+1], &state[v1+0], &state[v1+1])
+		zipperMerge(state[v0+2], state[v0+3], &state[v1+2], &state[v1+3])
 		msg = msg[32:]
 	}
 }
