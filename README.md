@@ -25,7 +25,7 @@ Notice that the amd64 AVX2 implementation is only available with Go 1.8 and newe
 
 ### Performance
 
-Platform/CPU      | Write 64            | Write 1024           | Sum 64 / cpb        | Sum 1024
+Platform/CPU      | Write 64            | Write 1024           | Sum 64              | Sum 1024
 ----------------- | ------------------- | -------------------- | ------------------- | ------------------- 
 AMD64 AVX2        | 4.66GB/s / 0.50 cpb | 10.6GB/s / 0.22 cpb  | 1.75GB/s / 1.33 cpb | 8.46GB/s / 0,28 cpb
 AMD64 SSE4.1      | 3.42GB/s / 0.68 cpb | 8.39GB/s / 0.28 cpb  | 1.29GB/s / 1.81 cpb | 6.69GB/s / 0.35 cpb
