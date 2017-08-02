@@ -8,6 +8,13 @@ import (
 	"encoding/binary"
 )
 
+const (
+	v0   = 0
+	v1   = 4
+	mul0 = 8
+	mul1 = 12
+)
+
 var (
 	init0 = [4]uint64{0xdbe6d5d5fe4cce2f, 0xa4093822299f31d0, 0x13198a2e03707344, 0x243f6a8885a308d3}
 	init1 = [4]uint64{0x3bd39e10cb0ef593, 0xc0acf169b5f18a8c, 0xbe5466cf34e90c6c, 0x452821e638d01377}
@@ -21,11 +28,11 @@ func initializeGeneric(state *[16]uint64, k []byte) {
 	key[2] = binary.LittleEndian.Uint64(k[16:])
 	key[3] = binary.LittleEndian.Uint64(k[24:])
 
-	copy(state[8:], init0[:])
-	copy(state[12:], init1[:])
+	copy(state[mul0:], init0[:])
+	copy(state[mul1:], init1[:])
 
 	for i, k := range key {
-		state[i] = init0[i] ^ k
+		state[v0+i] = init0[i] ^ k
 	}
 
 	key[0] = key[0]>>32 | key[0]<<32
@@ -34,16 +41,9 @@ func initializeGeneric(state *[16]uint64, k []byte) {
 	key[3] = key[3]>>32 | key[3]<<32
 
 	for i, k := range key {
-		state[i+4] = init1[i] ^ k
+		state[v1+i] = init1[i] ^ k
 	}
 }
-
-const (
-	v0   = 0
-	v1   = 4
-	mul0 = 8
-	mul1 = 12
-)
 
 func updateGeneric(state *[16]uint64, msg []byte) {
 	for len(msg) > 0 {
