@@ -92,10 +92,10 @@ func finalizeGeneric(out []byte, state *[16]uint64) {
 	var perm [4]uint64
 	var tmp [32]byte
 	for i := 0; i < 4; i++ {
-		perm[0] = state[2]>>32 | state[2]<<32
-		perm[1] = state[3]>>32 | state[3]<<32
-		perm[2] = state[0]>>32 | state[0]<<32
-		perm[3] = state[1]>>32 | state[1]<<32
+		perm[0] = state[v0+2]>>32 | state[v0+2]<<32
+		perm[1] = state[v0+3]>>32 | state[v0+3]<<32
+		perm[2] = state[v0+0]>>32 | state[v0+0]<<32
+		perm[3] = state[v0+1]>>32 | state[v0+1]<<32
 
 		binary.LittleEndian.PutUint64(tmp[0:], perm[0])
 		binary.LittleEndian.PutUint64(tmp[8:], perm[1])
@@ -107,16 +107,16 @@ func finalizeGeneric(out []byte, state *[16]uint64) {
 
 	switch len(out) {
 	case 8:
-		binary.LittleEndian.PutUint64(out, state[0]+state[4]+state[8]+state[12])
+		binary.LittleEndian.PutUint64(out, state[v0+0]+state[v1+0]+state[mul0+0]+state[mul1+0])
 	case 16:
-		binary.LittleEndian.PutUint64(out, state[0]+state[6]+state[8]+state[14])
-		binary.LittleEndian.PutUint64(out[8:], state[1]+state[7]+state[9]+state[15])
+		binary.LittleEndian.PutUint64(out, state[v0+0]+state[v1+2]+state[mul0+0]+state[mul1+2])
+		binary.LittleEndian.PutUint64(out[8:], state[v0+1]+state[v1+3]+state[mul0+1]+state[mul1+3])
 	case 32:
-		h0, h1 := reduceMod(state[0]+state[8+0], state[1]+state[8+1], state[4+0]+state[12+0], state[4+1]+state[12+1])
+		h0, h1 := reduceMod(state[v0+0]+state[mul0+0], state[v0+1]+state[mul0+1], state[v1+0]+state[mul1+0], state[v1+1]+state[mul1+1])
 		binary.LittleEndian.PutUint64(out[0:], h0)
 		binary.LittleEndian.PutUint64(out[8:], h1)
 
-		h0, h1 = reduceMod(state[2]+state[8+2], state[3]+state[8+3], state[4+2]+state[12+2], state[4+3]+state[12+3])
+		h0, h1 = reduceMod(state[v0+2]+state[mul0+2], state[v0+3]+state[mul0+3], state[v1+2]+state[mul1+2], state[v1+3]+state[mul1+3])
 		binary.LittleEndian.PutUint64(out[16:], h0)
 		binary.LittleEndian.PutUint64(out[24:], h1)
 	}
