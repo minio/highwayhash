@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 // +build !amd64
+// +build !arm64
 
 package highwayhash
 

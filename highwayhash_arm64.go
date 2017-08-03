@@ -18,6 +18,11 @@
 
 package highwayhash
 
+var (
+      useSSE4 = false
+      useAVX2 = false
+)
+
 //go:noescape
 func updateArm64(state *[16]uint64, msg []byte)
 
