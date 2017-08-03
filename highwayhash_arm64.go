@@ -19,8 +19,8 @@
 package highwayhash
 
 var (
-      useSSE4 = false
-      useAVX2 = false
+	useSSE4 = false
+	useAVX2 = false
 )
 
 //go:noescape
