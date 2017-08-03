@@ -16,6 +16,9 @@
 // limitations under the License.
 //
 
+// Use github.com/minio/asm2plan9s on this file to assemble ARM instructions to
+// the obcodes of their Plan9 equivalents
+
 TEXT ·updateArm64(SB), 7, $0
 	MOVD state+0(FP), R0
 	MOVD message+8(FP), R1
@@ -78,7 +81,6 @@ loop:
 	WORD $0x6e2c1ce7 // eor   v7.16b,v7.16b,v12.16b
 
 	// zipperMerge(state[v1+0], state[v1+1], &state[v0+0], &state[v0+1])
-	WORD $0x6e291d29 // eor v9.16b,v9.16b,v9.16b
 	WORD $0x6e051449 // ins v9.B[2], v2.B[2]
 	WORD $0x6e0d7c49 // ins v9.B[6], v2.B[8+7]
 	WORD $0x6e072c49 // ins v9.B[3], v2.B[5]
@@ -98,7 +100,6 @@ loop:
 	WORD $0x4ee98400 // add v0.2d, v0.2d, v9.2d
 
 	// zipperMerge(state[v1+2], state[v1+3], &state[v0+2], &state[v0+3])
-	WORD $0x6e291d29 // eor v9.16b,v9.16b,v9.16b
 	WORD $0x6e051469 // ins v9.B[2], v3.B[2]
 	WORD $0x6e0d7c69 // ins v9.B[6], v3.B[8+7]
 	WORD $0x6e072c69 // ins v9.B[3], v3.B[5]
@@ -118,7 +119,6 @@ loop:
 	WORD $0x4ee98421 // add v1.2d, v1.2d, v9.2d
 
 	// zipperMerge(state[v0+0], state[v0+1], &state[v1+0], &state[v1+1])
-	WORD $0x6e291d29 // eor v9.16b,v9.16b,v9.16b
 	WORD $0x6e051409 // ins v9.B[2], v0.B[2]
 	WORD $0x6e0d7c09 // ins v9.B[6], v0.B[8+7]
 	WORD $0x6e072c09 // ins v9.B[3], v0.B[5]
@@ -138,7 +138,6 @@ loop:
 	WORD $0x4ee98442 // add v2.2d, v2.2d, v9.2d
 
 	// zipperMerge(state[v0+2], state[v0+3], &state[v1+2], &state[v1+3])
-	WORD $0x6e291d29 // eor v9.16b,v9.16b,v9.16b
 	WORD $0x6e051429 // ins v9.B[2], v1.B[2]
 	WORD $0x6e0d7c29 // ins v9.B[6], v1.B[8+7]
 	WORD $0x6e072c29 // ins v9.B[3], v1.B[5]
