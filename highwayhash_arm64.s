@@ -17,16 +17,16 @@
 //
 
 // Use github.com/minio/asm2plan9s on this file to assemble ARM instructions to
-// the obcodes of their Plan9 equivalents
+// the opcodes of their Plan9 equivalents
 
 TEXT ·updateArm64(SB), 7, $0
 	MOVD state+0(FP), R0
-	MOVD message+8(FP), R1
-	MOVD lenmessage+16(FP), R2 // length of message
+	MOVD msg_base+8(FP), R1
+	MOVD msg_len+16(FP), R2 // length of message
 	SUBS $32, R2
 	BMI  complete
 
-    // Register work
+	// Definition of registers
 	//  v0 = v0.lo
 	//  v1 = v0.hi
 	//  v2 = v1.lo
@@ -43,11 +43,14 @@ TEXT ·updateArm64(SB), 7, $0
 loop:
 	// Main loop
 	WORD $0x4cdfa830 // ld1   {v16.4s-v17.4s}, [x1], #32
+
+	// Add message
 	WORD $0x4ef08442 // add   v2.2d, v2.2d, v16.2d
 	WORD $0x4ef18463 // add   v3.2d, v3.2d, v17.2d
 	WORD $0x4ee48442 // add   v2.2d, v2.2d, v4.2d
 	WORD $0x4ee58463 // add   v3.2d, v3.2d, v5.2d
 
+    // First multiply
 	WORD $0x6e04240a // ins   V10.S[0], V0.S[1]
 	WORD $0x6e0c640a // ins   V10.S[1], V0.S[3]
 	WORD $0x4ea21c4b // mov   v11.16b, v2.16b
@@ -57,6 +60,7 @@ loop:
 
 	WORD $0x4ee68400 // add   v0.2d, v0.2d, v6.2d
 
+    // Second multiply
 	WORD $0x4ea31c6b // mov   v11.16b, v3.16b
 	WORD $0x6e04242a // ins   V10.S[0], V1.S[1]
 	WORD $0x6e0c642a // ins   V10.S[1], V1.S[3]
@@ -64,6 +68,7 @@ loop:
 	WORD $0x2eaac16c // umull V12.2D, V11.2S, V10.2S
 	WORD $0x6e2c1ca5 // eor   v5.16b,v5.16b,v12.16b
 
+    // Third multiply
 	WORD $0x4ea01c0a // mov   v10.16b, v0.16b
 	WORD $0x6e04244b // ins   V11.S[0], V2.S[1]
 	WORD $0x6e0c644b // ins   V11.S[1], V2.S[3]
@@ -73,6 +78,7 @@ loop:
 
 	WORD $0x4ee78421 // add   v1.2d, v1.2d, v7.2d
 
+    // Fourth multiply
 	WORD $0x4ea11c2a // mov   v10.16b, v1.16b
 	WORD $0x6e04246b // ins   V11.S[0], V3.S[1]
 	WORD $0x6e0c442a // ins   V10.S[1], V1.S[2]
@@ -80,7 +86,7 @@ loop:
 	WORD $0x2eaac16c // umull V12.2D, V11.2S, V10.2S
 	WORD $0x6e2c1ce7 // eor   v7.16b,v7.16b,v12.16b
 
-	// zipperMerge(state[v1+0], state[v1+1], &state[v0+0], &state[v0+1])
+	// First zipper-merge
 	WORD $0x6e051449 // ins v9.B[2], v2.B[2]
 	WORD $0x6e0d7c49 // ins v9.B[6], v2.B[8+7]
 	WORD $0x6e072c49 // ins v9.B[3], v2.B[5]
@@ -99,7 +105,7 @@ loop:
 	WORD $0x6e194c49 // ins v9.B[8+4], v2.B[8+1]
 	WORD $0x4ee98400 // add v0.2d, v0.2d, v9.2d
 
-	// zipperMerge(state[v1+2], state[v1+3], &state[v0+2], &state[v0+3])
+	// Second zipper-merge
 	WORD $0x6e051469 // ins v9.B[2], v3.B[2]
 	WORD $0x6e0d7c69 // ins v9.B[6], v3.B[8+7]
 	WORD $0x6e072c69 // ins v9.B[3], v3.B[5]
@@ -118,7 +124,7 @@ loop:
 	WORD $0x6e194c69 // ins v9.B[8+4], v3.B[8+1]
 	WORD $0x4ee98421 // add v1.2d, v1.2d, v9.2d
 
-	// zipperMerge(state[v0+0], state[v0+1], &state[v1+0], &state[v1+1])
+	// Third zipper-merge
 	WORD $0x6e051409 // ins v9.B[2], v0.B[2]
 	WORD $0x6e0d7c09 // ins v9.B[6], v0.B[8+7]
 	WORD $0x6e072c09 // ins v9.B[3], v0.B[5]
@@ -137,7 +143,7 @@ loop:
 	WORD $0x6e194c09 // ins v9.B[8+4], v0.B[8+1]
 	WORD $0x4ee98442 // add v2.2d, v2.2d, v9.2d
 
-	// zipperMerge(state[v0+2], state[v0+3], &state[v1+2], &state[v1+3])
+	// Fourth zipper-merge
 	WORD $0x6e051429 // ins v9.B[2], v1.B[2]
 	WORD $0x6e0d7c29 // ins v9.B[6], v1.B[8+7]
 	WORD $0x6e072c29 // ins v9.B[3], v1.B[5]
