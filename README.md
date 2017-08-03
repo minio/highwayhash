@@ -25,17 +25,17 @@ All Go versions >= 1.7 are supported. Notice that the amd64 AVX2 implementation 
 
 Platform/CPU      | Write 64            | Write 1024           | Sum 64              | Sum 1024
 ----------------- | ------------------- | -------------------- | ------------------- | ------------------- 
-AMD64 AVX2        | 4.66GB/s / 0.50 cpb | 10.6GB/s / 0.22 cpb  | 1.75GB/s / 1.33 cpb | 8.46GB/s / 0.28 cpb
-AMD64 SSE4.1      | 3.42GB/s / 0.68 cpb | 8.39GB/s / 0.28 cpb  | 1.29GB/s / 1.81 cpb | 6.69GB/s / 0.35 cpb
+AMD64 AVX2        | 4.7 GB/s / 0.50 cpb | 10.6 GB/s / 0.22 cpb | 1.8 GB/s / 1.33 cpb | 8.5 GB/s / 0.28 cpb
+AMD64 SSE4.1      | 3.4 GB/s / 0.68 cpb |  8.4 GB/s / 0.28 cpb | 1.3 GB/s / 1.81 cpb | 6.7 GB/s / 0.35 cpb
 
 **Hardware:**  
 Intel i7-6500U 2.50GHz x 2 | Ubuntu 16.04 - kernel: 4.10.0-28-generic | Go: 1.8.3  
 
 ### ARM Performance
 
-Platform/CPU      | Write 64            | Write 1024           | Write 8192
------------------ | ------------------- | -------------------- | --------------------
-ARM64 NEON        | 327.35 MB/s         | 620.60 MB/s          | 657.21 MB/s
+Platform/CPU      | Write 64         | Write 1024        | Write 8192
+----------------- | ---------------- | ----------------- | -----------------
+ARM64 NEON        | 327 MB/s         | 621 MB/s          | 657 MB/s
 
 **Hardware:**  
 ARM Cortex-A53 1.2GHz (8 core) | Debian 8.0 Jessie | Go: 1.7.4
