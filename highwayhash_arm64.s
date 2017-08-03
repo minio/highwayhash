@@ -55,7 +55,7 @@ loop:
 	WORD $0x4ee48442 // add   v2.2d, v2.2d, v4.2d
 	WORD $0x4ee58463 // add   v3.2d, v3.2d, v5.2d
 
-    // First multiply
+	// First multiply
 	WORD $0x6e04240a // ins   V10.S[0], V0.S[1]
 	WORD $0x6e0c640a // ins   V10.S[1], V0.S[3]
 	WORD $0x4ea21c4b // mov   v11.16b, v2.16b
@@ -65,7 +65,7 @@ loop:
 
 	WORD $0x4ee68400 // add   v0.2d, v0.2d, v6.2d
 
-    // Second multiply
+	// Second multiply
 	WORD $0x4ea31c6b // mov   v11.16b, v3.16b
 	WORD $0x6e04242a // ins   V10.S[0], V1.S[1]
 	WORD $0x6e0c642a // ins   V10.S[1], V1.S[3]
@@ -73,7 +73,7 @@ loop:
 	WORD $0x2eaac16c // umull V12.2D, V11.2S, V10.2S
 	WORD $0x6e2c1ca5 // eor   v5.16b,v5.16b,v12.16b
 
-    // Third multiply
+	// Third multiply
 	WORD $0x4ea01c0a // mov   v10.16b, v0.16b
 	WORD $0x6e04244b // ins   V11.S[0], V2.S[1]
 	WORD $0x6e0c644b // ins   V11.S[1], V2.S[3]
@@ -83,7 +83,7 @@ loop:
 
 	WORD $0x4ee78421 // add   v1.2d, v1.2d, v7.2d
 
-    // Fourth multiply
+	// Fourth multiply
 	WORD $0x4ea11c2a // mov   v10.16b, v1.16b
 	WORD $0x6e04246b // ins   V11.S[0], V3.S[1]
 	WORD $0x6e0c442a // ins   V10.S[1], V1.S[2]
