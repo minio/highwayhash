@@ -37,9 +37,9 @@ TEXT ·updateArm64(SB), 7, $0
 	//  v7 = mul1.hi
 
 	// Load constants table pointer
-	MOVD $·zippermerge(SB), R3
-	// and cache zipper merge constant in register v20
-	WORD $0x4c407874 // ld1    {v20.4s}, [x3]
+	MOVD $·constants(SB), R3
+	// and load constants into v20, v21, and v22
+	WORD $0x4c406074 // ld1    {v20.16b-v22.16b}, [x3]
 
 	WORD $0x4cdf2c00 // ld1   {v0.2d-v3.2d}, [x0], #64
 	WORD $0x4c402c04 // ld1   {v4.2d-v7.2d}, [x0]
@@ -56,40 +56,29 @@ loop:
 	WORD $0x4ee58463 // add   v3.2d, v3.2d, v5.2d
 
 	// First multiply
-	WORD $0x6e04240a // ins   V10.S[0], V0.S[1]
-	WORD $0x6e0c640a // ins   V10.S[1], V0.S[3]
-	WORD $0x4ea21c4b // mov   v11.16b, v2.16b
-	WORD $0x6e0c456b // ins   V11.S[1], V11.S[2]
+	WORD $0x4e15200a // tbl   v10.16b,{v0.16b,v1.16b},v21.16b
+	WORD $0x4e16204b // tbl   v11.16b,{v2.16b,v3.16b},v22.16b
 	WORD $0x2eaac16c // umull V12.2D, V11.2S, V10.2S
 	WORD $0x6e2c1c84 // eor   v4.16b,v4.16b,v12.16b
 
 	WORD $0x4ee68400 // add   v0.2d, v0.2d, v6.2d
 
 	// Second multiply
-	WORD $0x4ea31c6b // mov   v11.16b, v3.16b
-	WORD $0x6e04242a // ins   V10.S[0], V1.S[1]
-	WORD $0x6e0c642a // ins   V10.S[1], V1.S[3]
-	WORD $0x6e0c456b // ins   V11.S[1], V11.S[2]
-	WORD $0x2eaac16c // umull V12.2D, V11.2S, V10.2S
-	WORD $0x6e2c1ca5 // eor   v5.16b,v5.16b,v12.16b
+	WORD $0x6eaac16c // umull2 V12.2D, V11.4S, V10.4S
+	WORD $0x6e2c1ca5 // eor    v5.16b,v5.16b,v12.16b
 
 	// Third multiply
-	WORD $0x4ea01c0a // mov   v10.16b, v0.16b
-	WORD $0x6e04244b // ins   V11.S[0], V2.S[1]
-	WORD $0x6e0c644b // ins   V11.S[1], V2.S[3]
-	WORD $0x6e0c440a // ins   V10.S[1], V0.S[2]
+	WORD $0x4e16200a // tbl   v10.16b,{v0.16b,v1.16b},v22.16b
+	WORD $0x4e15204b // tbl   v11.16b,{v2.16b,v3.16b},v21.16b
 	WORD $0x2eaac16c // umull V12.2D, V11.2S, V10.2S
 	WORD $0x6e2c1cc6 // eor   v6.16b,v6.16b,v12.16b
 
 	WORD $0x4ee78421 // add   v1.2d, v1.2d, v7.2d
+	WORD $0x4e16200a // tbl   v10.16b,{v0.16b,v1.16b},v22.16b
 
 	// Fourth multiply
-	WORD $0x4ea11c2a // mov   v10.16b, v1.16b
-	WORD $0x6e04246b // ins   V11.S[0], V3.S[1]
-	WORD $0x6e0c442a // ins   V10.S[1], V1.S[2]
-	WORD $0x6e0c646b // ins   V11.S[1], V3.S[3]
-	WORD $0x2eaac16c // umull V12.2D, V11.2S, V10.2S
-	WORD $0x6e2c1ce7 // eor   v7.16b,v7.16b,v12.16b
+	WORD $0x6eaac16c // umull2 V12.2D, V11.4S, V10.4S
+	WORD $0x6e2c1ce7 // eor    v7.16b,v7.16b,v12.16b
 
 	// First zipper-merge
 	WORD $0x4e140049 // tbl v9.16b,{v2.16b},v20.16b
@@ -117,8 +106,12 @@ loop:
 complete:
 	RET
 
-// Constant for zipper merge via TBL instruction
-DATA ·zippermerge+0x0(SB)/8, $0x000f010e05020c03
-DATA ·zippermerge+0x8(SB)/8, $0x070806090d0a040b
+// Constants for TBL instructions
+DATA ·constants+0x0(SB)/8, $0x000f010e05020c03 // zipper merge constant
+DATA ·constants+0x8(SB)/8, $0x070806090d0a040b
+DATA ·constants+0x10(SB)/8, $0x0f0e0d0c07060504 // setup first register for multiply
+DATA ·constants+0x18(SB)/8, $0x1f1e1d1c17161514
+DATA ·constants+0x20(SB)/8, $0x0b0a090803020100 // setup second register for multiply
+DATA ·constants+0x28(SB)/8, $0x1b1a191813121110
 
-GLOBL ·zippermerge(SB), 8, $16
+GLOBL ·constants(SB), 8, $48
