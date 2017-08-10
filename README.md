@@ -35,7 +35,8 @@ Intel i7-6500U 2.50GHz x 2 | Ubuntu 16.04 - kernel: 4.10.0-28-generic | Go: 1.8.
 
 Platform/CPU      | Write 64         | Write 1024        | Write 8192
 ----------------- | ---------------- | ----------------- | -----------------
-ARM64 NEON        | 327 MB/s         | 621 MB/s          | 657 MB/s
+ARM64 NEON        | 384 MB/s         | 955 MB/s          | 1053 MB/s
+
 
 **Hardware:**  
 ARM Cortex-A53 1.2GHz (8 core) | Debian 8.0 Jessie | Go: 1.7.4
