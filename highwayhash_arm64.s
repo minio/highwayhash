@@ -39,8 +39,8 @@ TEXT ·updateArm64(SB), 7, $0
 	// Load constants table pointer
 	MOVD $·constants(SB), R3
 
-	// and load constants into v20, v21, and v22
-	WORD $0x4c406074 // ld1    {v20.16b-v22.16b}, [x3]
+	// and load constants into v28, v29, and v30
+	WORD $0x4c40607c // ld1    {v28.16b-v30.16b}, [x3]
 
 	WORD $0x4cdf2c00 // ld1   {v0.2d-v3.2d}, [x0], #64
 	WORD $0x4c402c04 // ld1   {v4.2d-v7.2d}, [x0]
@@ -48,19 +48,19 @@ TEXT ·updateArm64(SB), 7, $0
 
 loop:
 	// Main loop
-	WORD $0x4cdfa830 // ld1   {v16.4s-v17.4s}, [x1], #32
+	WORD $0x4cdfa83a // ld1   {v26.4s-v27.4s}, [x1], #32
 
 	// Add message
-	WORD $0x4ef08442 // add   v2.2d, v2.2d, v16.2d
-	WORD $0x4ef18463 // add   v3.2d, v3.2d, v17.2d
+	WORD $0x4efa8442 // add   v2.2d, v2.2d, v26.2d
+	WORD $0x4efb8463 // add   v3.2d, v3.2d, v27.2d
 
 	// v1 += mul0
 	WORD $0x4ee48442 // add   v2.2d, v2.2d, v4.2d
 	WORD $0x4ee58463 // add   v3.2d, v3.2d, v5.2d
 
 	// First pair of multiplies
-	WORD $0x4e15200a // tbl    v10.16b,{v0.16b,v1.16b},v21.16b
-	WORD $0x4e16204b // tbl    v11.16b,{v2.16b,v3.16b},v22.16b
+	WORD $0x4e1d200a // tbl    v10.16b,{v0.16b,v1.16b},v29.16b
+	WORD $0x4e1e204b // tbl    v11.16b,{v2.16b,v3.16b},v30.16b
 	WORD $0x2eaac16c // umull  V12.2D, V11.2S, V10.2S
 	WORD $0x6eaac16d // umull2 V13.2D, V11.4S, V10.4S
 	WORD $0x6e2c1c84 // eor    v4.16b,v4.16b,v12.16b
@@ -71,27 +71,27 @@ loop:
 	WORD $0x4ee78421 // add   v1.2d, v1.2d, v7.2d
 
 	// Second pair of multiplies
-	WORD $0x4e16200e // tbl    v14.16b,{v0.16b,v1.16b},v22.16b
-	WORD $0x4e15204f // tbl    v15.16b,{v2.16b,v3.16b},v21.16b
+	WORD $0x4e1e200e // tbl    v14.16b,{v0.16b,v1.16b},v30.16b
+	WORD $0x4e1d204f // tbl    v15.16b,{v2.16b,v3.16b},v29.16b
 	WORD $0x2eaec1f0 // umull  V16.2D, V15.2S, V14.2S
 	WORD $0x6eaec1f1 // umull2 V17.2D, V15.4S, V14.4S
 	WORD $0x6e301cc6 // eor    v6.16b,v6.16b,v16.16b
 	WORD $0x6e311ce7 // eor    v7.16b,v7.16b,v17.16b
 
 	// First zipper-merge
-	WORD $0x4e140049 // tbl v9.16b,{v2.16b},v20.16b
+	WORD $0x4e1c0049 // tbl v9.16b,{v2.16b},v28.16b
 	WORD $0x4ee98400 // add v0.2d, v0.2d, v9.2d
 
 	// Second zipper-merge
-	WORD $0x4e140069 // tbl v9.16b,{v3.16b},v20.16b
+	WORD $0x4e1c0069 // tbl v9.16b,{v3.16b},v28.16b
 	WORD $0x4ee98421 // add v1.2d, v1.2d, v9.2d
 
 	// Third zipper-merge
-	WORD $0x4e140009 // tbl v9.16b,{v0.16b},v20.16b
+	WORD $0x4e1c0009 // tbl v9.16b,{v0.16b},v28.16b
 	WORD $0x4ee98442 // add v2.2d, v2.2d, v9.2d
 
 	// Fourth zipper-merge
-	WORD $0x4e140029 // tbl v9.16b,{v1.16b},v20.16b
+	WORD $0x4e1c0029 // tbl v9.16b,{v1.16b},v28.16b
 	WORD $0x4ee98463 // add v3.2d, v3.2d, v9.2d
 
 	SUBS $32, R2
