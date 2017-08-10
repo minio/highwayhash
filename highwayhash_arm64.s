@@ -63,20 +63,20 @@ loop:
 	WORD $0x4e1e204b // tbl    v11.16b,{v2.16b,v3.16b},v30.16b
 	WORD $0x2eaac16c // umull  v12.2d, v11.2s, v10.2s
 	WORD $0x6eaac16d // umull2 v13.2d, v11.4s, v10.4s
-	WORD $0x6e2c1c84 // eor    v4.16b,v4.16b,v12.16b
-	WORD $0x6e2d1ca5 // eor    v5.16b,v5.16b,v13.16b
 
 	// v0 += mul1
 	WORD $0x4ee68400 // add   v0.2d, v0.2d, v6.2d
 	WORD $0x4ee78421 // add   v1.2d, v1.2d, v7.2d
+
+	// EOR multiplication result in
+	WORD $0x6e2c1c84 // eor    v4.16b,v4.16b,v12.16b
+	WORD $0x6e2d1ca5 // eor    v5.16b,v5.16b,v13.16b
 
 	// Second pair of multiplies
 	WORD $0x4e1e200e // tbl    v14.16b,{v0.16b,v1.16b},v30.16b
 	WORD $0x4e1d204f // tbl    v15.16b,{v2.16b,v3.16b},v29.16b
 	WORD $0x2eaec1f0 // umull  v16.2d, v15.2s, v14.2s
 	WORD $0x6eaec1f1 // umull2 v17.2d, v15.4s, v14.4s
-	WORD $0x6e301cc6 // eor    v6.16b,v6.16b,v16.16b
-	WORD $0x6e311ce7 // eor    v7.16b,v7.16b,v17.16b
 
 	// First pair of zipper-merges
 	WORD $0x4e1c0052 // tbl v18.16b,{v2.16b},v28.16b
@@ -89,6 +89,10 @@ loop:
 	WORD $0x4ef48442 // add v2.2d, v2.2d, v20.2d
 	WORD $0x4e1c0035 // tbl v21.16b,{v1.16b},v28.16b
 	WORD $0x4ef58463 // add v3.2d, v3.2d, v21.2d
+
+	// EOR multiplication result in
+        WORD $0x6e301cc6 // eor    v6.16b,v6.16b,v16.16b
+        WORD $0x6e311ce7 // eor    v7.16b,v7.16b,v17.16b
 
 	SUBS $32, R2
 	BPL  loop
