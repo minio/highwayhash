@@ -68,13 +68,14 @@ loop:
 	WORD $0x4ee68400 // add   v0.2d, v0.2d, v6.2d
 	WORD $0x4ee78421 // add   v1.2d, v1.2d, v7.2d
 
+	// Second pair of multiplies
+	WORD $0x4e1d204f // tbl    v15.16b,{v2.16b,v3.16b},v29.16b
+	WORD $0x4e1e200e // tbl    v14.16b,{v0.16b,v1.16b},v30.16b
+
 	// EOR multiplication result in
 	WORD $0x6e2c1c84 // eor    v4.16b,v4.16b,v12.16b
 	WORD $0x6e2d1ca5 // eor    v5.16b,v5.16b,v13.16b
 
-	// Second pair of multiplies
-	WORD $0x4e1e200e // tbl    v14.16b,{v0.16b,v1.16b},v30.16b
-	WORD $0x4e1d204f // tbl    v15.16b,{v2.16b,v3.16b},v29.16b
 	WORD $0x2eaec1f0 // umull  v16.2d, v15.2s, v14.2s
 	WORD $0x6eaec1f1 // umull2 v17.2d, v15.4s, v14.4s
 
