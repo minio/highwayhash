@@ -21,6 +21,7 @@ package highwayhash
 var (
 	useSSE4 = false
 	useAVX2 = false
+	useNEON = true
 )
 
 //go:noescape
@@ -31,7 +32,11 @@ func initialize(state *[16]uint64, key []byte) {
 }
 
 func update(state *[16]uint64, msg []byte) {
-	updateArm64(state, msg)
+	if useNEON {
+		updateArm64(state, msg)
+	} else {
+		updateGeneric(state, msg)
+	}
 }
 
 func finalize(out []byte, state *[16]uint64) {

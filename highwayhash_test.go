@@ -31,6 +31,13 @@ func TestVectors(t *testing.T) {
 		testVectors(New, testVectors256, t)
 		useSSE4 = false
 	}
+	if useNEON {
+                t.Log("NEON version")
+                testVectors(func(key []byte) (hash.Hash, error) { return New64(key) }, testVectors64, t)
+                testVectors(New128, testVectors128, t)
+                testVectors(New, testVectors256, t)
+                useNEON = false
+	}
 	t.Log("generic version")
 	testVectors(func(key []byte) (hash.Hash, error) { return New64(key) }, testVectors64, t)
 	testVectors(New128, testVectors128, t)

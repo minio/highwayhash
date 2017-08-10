@@ -10,6 +10,7 @@ package highwayhash
 var (
 	useSSE4 = supportsSSE4()
 	useAVX2 = supportsAVX2()
+	useNEON = false
 )
 
 //go:noescape

@@ -10,6 +10,7 @@ package highwayhash
 var (
 	useSSE4 = false
 	useAVX2 = false
+	useNEON = false
 )
 
 func initialize(state *[16]uint64, k []byte) {
