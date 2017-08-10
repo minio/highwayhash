@@ -78,21 +78,17 @@ loop:
 	WORD $0x6e301cc6 // eor    v6.16b,v6.16b,v16.16b
 	WORD $0x6e311ce7 // eor    v7.16b,v7.16b,v17.16b
 
-	// First zipper-merge
-	WORD $0x4e1c0049 // tbl v9.16b,{v2.16b},v28.16b
-	WORD $0x4ee98400 // add v0.2d, v0.2d, v9.2d
+	// First pair of zipper-merges
+	WORD $0x4e1c0052 // tbl v18.16b,{v2.16b},v28.16b
+	WORD $0x4e1c0073 // tbl v19.16b,{v3.16b},v28.16b
+	WORD $0x4ef28400 // add v0.2d, v0.2d, v18.2d
+	WORD $0x4ef38421 // add v1.2d, v1.2d, v19.2d
 
-	// Second zipper-merge
-	WORD $0x4e1c0069 // tbl v9.16b,{v3.16b},v28.16b
-	WORD $0x4ee98421 // add v1.2d, v1.2d, v9.2d
-
-	// Third zipper-merge
-	WORD $0x4e1c0009 // tbl v9.16b,{v0.16b},v28.16b
-	WORD $0x4ee98442 // add v2.2d, v2.2d, v9.2d
-
-	// Fourth zipper-merge
-	WORD $0x4e1c0029 // tbl v9.16b,{v1.16b},v28.16b
-	WORD $0x4ee98463 // add v3.2d, v3.2d, v9.2d
+	// Second pair of zipper-merges
+	WORD $0x4e1c0014 // tbl v20.16b,{v0.16b},v28.16b
+	WORD $0x4e1c0035 // tbl v21.16b,{v1.16b},v28.16b
+	WORD $0x4ef48442 // add v2.2d, v2.2d, v20.2d
+	WORD $0x4ef58463 // add v3.2d, v3.2d, v21.2d
 
 	SUBS $32, R2
 	BPL  loop
