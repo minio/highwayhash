@@ -47,37 +47,33 @@ func initializeGeneric(state *[16]uint64, k []byte) {
 
 func updateGeneric(state *[16]uint64, msg []byte) {
 	for len(msg) > 0 {
+		// add message
 		state[v1+0] += binary.LittleEndian.Uint64(msg)
-		state[v1+0] += state[mul0+0]
-		t1 := uint32(state[v1+0])
-		state[mul0+0] ^= uint64(t1) * (state[v0+0] >> 32)
-		state[v0+0] += state[mul1+0]
-		t0 := uint32(state[v0+0])
-		state[mul1+0] ^= uint64(t0) * (state[v1+0] >> 32)
-
 		state[v1+1] += binary.LittleEndian.Uint64(msg[8:])
-		state[v1+1] += state[mul0+1]
-		t1 = uint32(state[v1+1])
-		state[mul0+1] ^= uint64(t1) * (state[v0+1] >> 32)
-		state[v0+1] += state[mul1+1]
-		t0 = uint32(state[v0+1])
-		state[mul1+1] ^= uint64(t0) * (state[v1+1] >> 32)
-
 		state[v1+2] += binary.LittleEndian.Uint64(msg[16:])
-		state[v1+2] += state[mul0+2]
-		t1 = uint32(state[v1+2])
-		state[mul0+2] ^= uint64(t1) * (state[v0+2] >> 32)
-		state[v0+2] += state[mul1+2]
-		t0 = uint32(state[v0+2])
-		state[mul1+2] ^= uint64(t0) * (state[v1+2] >> 32)
-
 		state[v1+3] += binary.LittleEndian.Uint64(msg[24:])
+
+		// v1 += mul0
+		state[v1+0] += state[mul0+0]
+		state[v1+1] += state[mul0+1]
+		state[v1+2] += state[mul0+2]
 		state[v1+3] += state[mul0+3]
-		t1 = uint32(state[v1+3])
-		state[mul0+3] ^= uint64(t1) * (state[v0+3] >> 32)
+
+		state[mul0+0] ^= uint64(uint32(state[v1+0])) * (state[v0+0] >> 32)
+		state[mul0+1] ^= uint64(uint32(state[v1+1])) * (state[v0+1] >> 32)
+		state[mul0+2] ^= uint64(uint32(state[v1+2])) * (state[v0+2] >> 32)
+		state[mul0+3] ^= uint64(uint32(state[v1+3])) * (state[v0+3] >> 32)
+
+		// v0 += mul1
+		state[v0+0] += state[mul1+0]
+		state[v0+1] += state[mul1+1]
+		state[v0+2] += state[mul1+2]
 		state[v0+3] += state[mul1+3]
-		t0 = uint32(state[v0+3])
-		state[mul1+3] ^= uint64(t0) * (state[v1+3] >> 32)
+
+		state[mul1+0] ^= uint64(uint32(state[v0+0])) * (state[v1+0] >> 32)
+		state[mul1+1] ^= uint64(uint32(state[v0+1])) * (state[v1+1] >> 32)
+		state[mul1+2] ^= uint64(uint32(state[v0+2])) * (state[v1+2] >> 32)
+		state[mul1+3] ^= uint64(uint32(state[v0+3])) * (state[v1+3] >> 32)
 
 		zipperMerge(state[v1+0], state[v1+1], &state[v0+0], &state[v0+1])
 		zipperMerge(state[v1+2], state[v1+3], &state[v0+2], &state[v0+3])
