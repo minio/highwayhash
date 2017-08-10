@@ -53,6 +53,8 @@ loop:
 	// Add message
 	WORD $0x4ef08442 // add   v2.2d, v2.2d, v16.2d
 	WORD $0x4ef18463 // add   v3.2d, v3.2d, v17.2d
+
+	// v1 += mul0
 	WORD $0x4ee48442 // add   v2.2d, v2.2d, v4.2d
 	WORD $0x4ee58463 // add   v3.2d, v3.2d, v5.2d
 
@@ -62,20 +64,19 @@ loop:
 	WORD $0x2eaac16c // umull V12.2D, V11.2S, V10.2S
 	WORD $0x6e2c1c84 // eor   v4.16b,v4.16b,v12.16b
 
-	WORD $0x4ee68400 // add   v0.2d, v0.2d, v6.2d
-
 	// Second multiply
 	WORD $0x6eaac16c // umull2 V12.2D, V11.4S, V10.4S
 	WORD $0x6e2c1ca5 // eor    v5.16b,v5.16b,v12.16b
+
+	// v0 += mul1
+	WORD $0x4ee68400 // add   v0.2d, v0.2d, v6.2d
+	WORD $0x4ee78421 // add   v1.2d, v1.2d, v7.2d
 
 	// Third multiply
 	WORD $0x4e16200a // tbl   v10.16b,{v0.16b,v1.16b},v22.16b
 	WORD $0x4e15204b // tbl   v11.16b,{v2.16b,v3.16b},v21.16b
 	WORD $0x2eaac16c // umull V12.2D, V11.2S, V10.2S
 	WORD $0x6e2c1cc6 // eor   v6.16b,v6.16b,v12.16b
-
-	WORD $0x4ee78421 // add   v1.2d, v1.2d, v7.2d
-	WORD $0x4e16200a // tbl   v10.16b,{v0.16b,v1.16b},v22.16b
 
 	// Fourth multiply
 	WORD $0x6eaac16c // umull2 V12.2D, V11.4S, V10.4S
