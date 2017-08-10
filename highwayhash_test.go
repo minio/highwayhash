@@ -13,9 +13,9 @@ import (
 )
 
 func TestVectors(t *testing.T) {
-	defer func(sse4, avx2 bool) {
-		useSSE4, useAVX2 = sse4, avx2
-	}(useSSE4, useAVX2)
+	defer func(sse4, avx2, neon bool) {
+		useSSE4, useAVX2, useNEON = sse4, avx2, neon
+	}(useSSE4, useAVX2, useNEON)
 
 	if useAVX2 {
 		t.Log("AVX2 version")
