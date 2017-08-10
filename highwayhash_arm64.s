@@ -80,14 +80,14 @@ loop:
 
 	// First pair of zipper-merges
 	WORD $0x4e1c0052 // tbl v18.16b,{v2.16b},v28.16b
-	WORD $0x4e1c0073 // tbl v19.16b,{v3.16b},v28.16b
 	WORD $0x4ef28400 // add v0.2d, v0.2d, v18.2d
+	WORD $0x4e1c0073 // tbl v19.16b,{v3.16b},v28.16b
 	WORD $0x4ef38421 // add v1.2d, v1.2d, v19.2d
 
 	// Second pair of zipper-merges
 	WORD $0x4e1c0014 // tbl v20.16b,{v0.16b},v28.16b
-	WORD $0x4e1c0035 // tbl v21.16b,{v1.16b},v28.16b
 	WORD $0x4ef48442 // add v2.2d, v2.2d, v20.2d
+	WORD $0x4e1c0035 // tbl v21.16b,{v1.16b},v28.16b
 	WORD $0x4ef58463 // add v3.2d, v3.2d, v21.2d
 
 	SUBS $32, R2
