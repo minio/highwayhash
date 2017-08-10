@@ -91,8 +91,8 @@ loop:
 	WORD $0x4ef58463 // add v3.2d, v3.2d, v21.2d
 
 	// EOR multiplication result in
-        WORD $0x6e301cc6 // eor    v6.16b,v6.16b,v16.16b
-        WORD $0x6e311ce7 // eor    v7.16b,v7.16b,v17.16b
+	WORD $0x6e301cc6 // eor    v6.16b,v6.16b,v16.16b
+	WORD $0x6e311ce7 // eor    v7.16b,v7.16b,v17.16b
 
 	SUBS $32, R2
 	BPL  loop
