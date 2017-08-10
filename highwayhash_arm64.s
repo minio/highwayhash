@@ -38,6 +38,7 @@ TEXT ·updateArm64(SB), 7, $0
 
 	// Load constants table pointer
 	MOVD $·constants(SB), R3
+
 	// and load constants into v20, v21, and v22
 	WORD $0x4c406074 // ld1    {v20.16b-v22.16b}, [x3]
 
