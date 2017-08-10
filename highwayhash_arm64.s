@@ -61,8 +61,8 @@ loop:
 	// First pair of multiplies
 	WORD $0x4e1d200a // tbl    v10.16b,{v0.16b,v1.16b},v29.16b
 	WORD $0x4e1e204b // tbl    v11.16b,{v2.16b,v3.16b},v30.16b
-	WORD $0x2eaac16c // umull  V12.2D, V11.2S, V10.2S
-	WORD $0x6eaac16d // umull2 V13.2D, V11.4S, V10.4S
+	WORD $0x2eaac16c // umull  v12.2d, v11.2s, v10.2s
+	WORD $0x6eaac16d // umull2 v13.2d, v11.4s, v10.4s
 	WORD $0x6e2c1c84 // eor    v4.16b,v4.16b,v12.16b
 	WORD $0x6e2d1ca5 // eor    v5.16b,v5.16b,v13.16b
 
@@ -73,8 +73,8 @@ loop:
 	// Second pair of multiplies
 	WORD $0x4e1e200e // tbl    v14.16b,{v0.16b,v1.16b},v30.16b
 	WORD $0x4e1d204f // tbl    v15.16b,{v2.16b,v3.16b},v29.16b
-	WORD $0x2eaec1f0 // umull  V16.2D, V15.2S, V14.2S
-	WORD $0x6eaec1f1 // umull2 V17.2D, V15.4S, V14.4S
+	WORD $0x2eaec1f0 // umull  v16.2d, v15.2s, v14.2s
+	WORD $0x6eaec1f1 // umull2 v17.2d, v15.4s, v14.4s
 	WORD $0x6e301cc6 // eor    v6.16b,v6.16b,v16.16b
 	WORD $0x6e311ce7 // eor    v7.16b,v7.16b,v17.16b
 
