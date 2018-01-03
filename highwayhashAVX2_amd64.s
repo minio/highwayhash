@@ -157,6 +157,37 @@ TEXT ·finalizeAVX2(SB), 4, $0-32
 	VPSHUFD $177, Y0, Y0
 	UPDATE(Y0)
 
+	CMPQ CX, $8
+	JE   skipUpdate     // Just 4 rounds for 64-bit checksum
+
+	VPERM2I128 $1, Y1, Y1, Y0
+	VPSHUFD $177, Y0, Y0
+	UPDATE(Y0)
+
+	VPERM2I128 $1, Y1, Y1, Y0
+	VPSHUFD $177, Y0, Y0
+	UPDATE(Y0)
+
+	CMPQ CX, $16
+	JE   skipUpdate     // 6 rounds for 128-bit checksum
+
+	VPERM2I128 $1, Y1, Y1, Y0
+	VPSHUFD $177, Y0, Y0
+	UPDATE(Y0)
+
+	VPERM2I128 $1, Y1, Y1, Y0
+	VPSHUFD $177, Y0, Y0
+	UPDATE(Y0)
+
+	VPERM2I128 $1, Y1, Y1, Y0
+	VPSHUFD $177, Y0, Y0
+	UPDATE(Y0)
+
+	VPERM2I128 $1, Y1, Y1, Y0
+	VPSHUFD $177, Y0, Y0
+	UPDATE(Y0)
+
+skipUpdate:
 	VMOVDQU Y1, 0(AX)
 	VMOVDQU Y2, 32(AX)
 	VMOVDQU Y3, 64(AX)
@@ -164,11 +195,11 @@ TEXT ·finalizeAVX2(SB), 4, $0-32
 	VZEROUPPER
 
 	CMPQ CX, $8
-	JE   HASH_64
+	JE   hash64
 	CMPQ CX, $16
-	JE   HASH_128
+	JE   hash128
 
-HASH_256:
+    // 256-bit checksum
 	MOVQ 0*8(AX), R8
 	MOVQ 1*8(AX), R9
 	MOVQ 4*8(AX), R10
@@ -196,7 +227,7 @@ HASH_256:
 	MOVQ   R15, 24(BX)
 	RET
 
-HASH_128:
+hash128:
 	MOVQ 0*8(AX), R8
 	MOVQ 1*8(AX), R9
 	ADDQ 6*8(AX), R8
@@ -209,7 +240,7 @@ HASH_128:
 	MOVQ R9, 8(BX)
 	RET
 
-HASH_64:
+hash64:
 	MOVQ 0*8(AX), DX
 	ADDQ 4*8(AX), DX
 	ADDQ 8*8(AX), DX

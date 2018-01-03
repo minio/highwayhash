@@ -87,7 +87,13 @@ func updateGeneric(state *[16]uint64, msg []byte) {
 func finalizeGeneric(out []byte, state *[16]uint64) {
 	var perm [4]uint64
 	var tmp [32]byte
-	for i := 0; i < 4; i++ {
+	runs := 4
+	if len(out) == 16 {
+		runs = 6
+	} else if len(out) == 32 {
+		runs = 10
+	}
+	for i := 0; i < runs; i++ {
 		perm[0] = state[v0+2]>>32 | state[v0+2]<<32
 		perm[1] = state[v0+3]>>32 | state[v0+3]<<32
 		perm[2] = state[v0+0]>>32 | state[v0+0]<<32

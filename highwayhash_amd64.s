@@ -210,6 +210,37 @@ TEXT ·finalizeSSE4(SB), 4, $0-32
 	PSHUFD $177, v00, t1
 	UPDATE(t0, t1)
 
+	CMPQ CX, $8
+	JE   skipUpdate     // Just 4 rounds for 64-bit checksum
+
+	PSHUFD $177, v01, t0
+	PSHUFD $177, v00, t1
+	UPDATE(t0, t1)
+
+	PSHUFD $177, v01, t0
+	PSHUFD $177, v00, t1
+	UPDATE(t0, t1)
+
+	CMPQ CX, $16
+	JE   skipUpdate     // 6 rounds for 128-bit checksum
+
+	PSHUFD $177, v01, t0
+	PSHUFD $177, v00, t1
+	UPDATE(t0, t1)
+
+	PSHUFD $177, v01, t0
+	PSHUFD $177, v00, t1
+	UPDATE(t0, t1)
+
+	PSHUFD $177, v01, t0
+	PSHUFD $177, v00, t1
+	UPDATE(t0, t1)
+
+	PSHUFD $177, v01, t0
+	PSHUFD $177, v00, t1
+	UPDATE(t0, t1)
+
+skipUpdate:
 	MOVOU v00, 0(AX)
 	MOVOU v01, 16(AX)
 	MOVOU v10, 32(AX)
@@ -220,11 +251,11 @@ TEXT ·finalizeSSE4(SB), 4, $0-32
 	MOVOU m11, 112(AX)
 
 	CMPQ CX, $8
-	JE   HASH_64
+	JE   hash64
 	CMPQ CX, $16
-	JE   HASH_128
+	JE   hash128
 
-HASH_256:
+    // 256-bit checksum
 	PADDQ v00, m00
 	PADDQ v10, m10
 	PADDQ v01, m01
@@ -247,14 +278,14 @@ HASH_256:
 	MOVQ   R15, 24(BX)
 	RET
 
-HASH_128:
+hash128:
 	PADDQ v00, v11
 	PADDQ m00, m11
 	PADDQ v11, m11
 	MOVOU m11, 0(BX)
 	RET
 
-HASH_64:
+hash64:
 	PADDQ v00, v10
 	PADDQ m00, m10
 	PADDQ v10, m10
