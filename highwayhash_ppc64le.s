@@ -1,7 +1,7 @@
 //+build !noasm !appengine
 
 //
-// Minio Cloud Storage, (C) 2017 Minio, Inc.
+// Minio Cloud Storage, (C) 2018 Minio, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,120 +16,168 @@
 // limitations under the License.
 //
 
-// Use github.com/minio/asm2plan9s on this file to assemble ARM instructions to
-// the opcodes of their Plan9 equivalents
+// Definition of registers
+#define V0_LO    VS32
+#define V0_LO_   V0
+#define V0_HI    VS33
+#define V0_HI_   V1
+#define V1_LO    VS34
+#define V1_LO_   V2
+#define V1_HI    VS35
+#define V1_HI_   V3
+#define MUL0_LO  VS36
+#define MUL0_LO_ V4
+#define MUL0_HI  VS37
+#define MUL0_HI_ V5
+#define MUL1_LO  VS38
+#define MUL1_LO_ V6
+#define MUL1_HI  VS39
+#define MUL1_HI_ V7
+
+// Message
+#define MSG_LO   VS40
+#define MSG_LO_  V8
+#define MSG_HI   VS41
+
+// Constants
+#define ROTATE	 VS42
+#define ROTATE_  V10
+#define MASK	 VS43
+#define MASK_	 V11
+
+// Temps
+#define TEMP1    VS44
+#define TEMP1_   V12
+#define TEMP2    VS45
+#define TEMP2_   V13
+#define TEMP3    VS46
+#define TEMP3_   V14
+#define TEMP4_   V15
+#define TEMP5_   V16
+#define TEMP6_   V17
+#define TEMP7_   V18
+
+// Regular registers
+#define STATE     R2
+#define MSG_BASE  R3
+#define MSG_LEN   R4
+#define CONSTANTS R5
+#define P1        R6
+#define P2        R7
+#define P3        R8
+#define P4        R9
+#define P5        R10
+#define P6        R11
+#define P7        R12
 
 TEXT ·updatePpc64Le(SB), 7, $0
-        MOVD state+0(FP), R14
-        MOVD msg_base+8(FP), R10
-        MOVD msg_len+16(FP), R5 // length of message
+	MOVD state+0(FP), STATE
+	MOVD msg_base+8(FP), MSG_BASE
+	MOVD msg_len+16(FP), MSG_LEN  // length of message
 
-        WORD $0x3AE00000        // li      r23,0
-        WORD $0x3B000010        // li      r24,0x10
+	// Sanity check for length
+	CMPU MSG_LEN, $31
+	BLE  complete
 
-        // Load constants table pointer
-        MOVD $·constants(SB), R20
-        WORD $0x7CF4BE99        // lxvd2x  vs39,r20,r23
-        WORD $0xF0E73A57        // xxswapd vs39,vs39        // necessary?
-        WORD $0x7D14C699        // lxvd2x  vs40,r20,r24
-        WORD $0xF1084257        // xxswapd vs40,vs40        // necessary?
-        WORD $0xF1084597        // xxlnand vs40,vs40,vs40   // necessary?
+	// Setup offsets
+	MOVD     $16, P1
+	MOVD     $32, P2
+	MOVD     $48, P3
+	MOVD     $64, P4
+	MOVD     $80, P5
+	MOVD     $96, P6
+	MOVD     $112, P7
 
-        WORD $0x3B200020        // li      r25,0x20
-        WORD $0x3B400030        // li      r26,0x30
-        WORD $0x3B600040        // li      r27,0x40
-        WORD $0x3B800050        // li      r28,0x50
-        WORD $0x3BA00060        // li      r29,0x60
-        WORD $0x3AC00070        // li      r22,0x70
+	// Load state
+	LXVD2X   (STATE)(R0), V0_LO
+	LXVD2X   (STATE)(P1), V0_HI
+	LXVD2X   (STATE)(P2), V1_LO
+	LXVD2X   (STATE)(P3), V1_HI
+	LXVD2X   (STATE)(P4), MUL0_LO
+	LXVD2X   (STATE)(P5), MUL0_HI
+	LXVD2X   (STATE)(P6), MUL1_LO
+	LXVD2X   (STATE)(P7), MUL1_HI
+	XXPERMDI V0_LO,   V0_LO,   $2, V0_LO
+	XXPERMDI V0_HI,   V0_HI,   $2, V0_HI
+	XXPERMDI V1_LO,   V1_LO,   $2, V1_LO
+	XXPERMDI V1_HI,   V1_HI,   $2, V1_HI
+	XXPERMDI MUL0_LO, MUL0_LO, $2, MUL0_LO
+	XXPERMDI MUL0_HI, MUL0_HI, $2, MUL0_HI
+	XXPERMDI MUL1_LO, MUL1_LO, $2, MUL1_LO
+	XXPERMDI MUL1_HI, MUL1_HI, $2, MUL1_HI
 
-        // Load state
-        WORD $0x7DAEBE99        // lxvd2x  vs45,r14,r23
-        WORD $0x7D6EC699        // lxvd2x  vs43,r14,r24
-        WORD $0x7C2ECE99        // lxvd2x  vs33,r14,r25
-        WORD $0x7C0ED699        // lxvd2x  vs32,r14,r26
-        WORD $0x7C4EDE99        // lxvd2x  vs34,r14,r27
-        WORD $0x7C6EE699        // lxvd2x  vs35,r14,r28
-        WORD $0x7C8EEE99        // lxvd2x  vs36,r14,r29
-        WORD $0x7CAEB699        // lxvd2x  vs37,r14,r22
-
-        WORD $0xF1AD6A57        // xxswapd vs45,vs45
-        WORD $0xF16B5A57        // xxswapd vs43,vs43
-        WORD $0xF0210A57        // xxswapd vs33,vs33
-        WORD $0xF0000257        // xxswapd vs32,vs32
-        WORD $0xF0421257        // xxswapd vs34,vs34
-        WORD $0xF0631A57        // xxswapd vs35,vs35
-        WORD $0xF0842257        // xxswapd vs36,vs36
-        WORD $0xF0A52A57        // xxswapd vs37,vs37
-
-        WORD $0x38a5ffe0        // ADD R5, $-32, R5
-        WORD $0x7c250000        // CMP R0, R5
-        BLE complete
+	// Load constants table pointer
+	MOVD     $·constants(SB), CONSTANTS
+	LXVD2X   (CONSTANTS)(R0), ROTATE
+	XXPERMDI ROTATE, ROTATE, $2, ROTATE
+	LXVD2X   (CONSTANTS)(P1), MASK
+	XXPERMDI MASK, MASK, $2, MASK
+	XXLNAND  MASK, MASK, MASK
 
 loop:
-        WORD $0x38EA0010        // addi    r7,r10,16
-        WORD $0x7D805699        // lxvd2x  vs44,0,r10
-        WORD $0x112D20C0        // vaddudm v9,v13,v4
-        WORD $0x10CD38C4        // vrld    v6,v13,v7
-        WORD $0x394A0020        // addi    r10,r10,32
-        WORD $0x114558C0        // vaddudm v10,v5,v11
-        WORD $0x7C003E98        // lxvd2x  vs0,0,r7
-        WORD $0xF18C6257        // xxswapd vs44,vs44
-        WORD $0xF1A00251        // xxswapd vs45,vs0
-        WORD $0x118C10C0        // vaddudm v12,v12,v2
-        WORD $0x11AD18C0        // vaddudm v13,v13,v3
-        WORD $0x102C08C0        // vaddudm v1,v12,v1
-        WORD $0x118B3EC4        // vsrd    v12,v11,v7
-        WORD $0x100D00C0        // vaddudm v0,v13,v0
-        WORD $0x11A10A2B        // vperm   v13,v1,v1,v8
-        WORD $0x10C13088        // vmulouw v6,v1,v6
-        WORD $0x1260022B        // vperm   v19,v0,v0,v8
-        WORD $0x11AD48C0        // vaddudm v13,v13,v9
-        WORD $0x11806088        // vmulouw v12,v0,v12
-        WORD $0x117350C0        // vaddudm v11,v19,v10
-        WORD $0x124D6A2B        // vperm   v18,v13,v13,v8
-        WORD $0x120138C4        // vrld    v16,v1,v7
-        WORD $0x12203EC4        // vsrd    v17,v0,v7
-        WORD $0x126B5A2B        // vperm   v19,v11,v11,v8
-        WORD $0xF04234D7        // xxlxor  vs34,vs34,vs38
-        WORD $0x11298088        // vmulouw v9,v9,v16
-        WORD $0x114A8888        // vmulouw v10,v10,v17
-        WORD $0xF06364D7        // xxlxor  vs35,vs35,vs44
-        WORD $0xF0844CD7        // xxlxor  vs36,vs36,vs41
-        WORD $0xF0A554D7        // xxlxor  vs37,vs37,vs42
-        WORD $0x103208C0        // vaddudm v1,v18,v1
-        WORD $0x101300C0        // vaddudm v0,v19,v0
+	// Main highwayhash update loop
+	LXVD2X   (MSG_BASE)(R0), MSG_LO
+	VADDUDM  V0_LO_,   MUL1_LO_, TEMP1_
+	VRLD     V0_LO_,   ROTATE_,  TEMP2_
+	VADDUDM  MUL1_HI_, V0_HI_,   TEMP3_
+	LXVD2X   (MSG_BASE)(P1), MSG_HI
+	ADD      $32,      MSG_BASE, MSG_BASE
+	XXPERMDI MSG_LO,   MSG_LO,   $2, MSG_LO
+	XXPERMDI MSG_HI,   MSG_HI,   $2, V0_LO
+	VADDUDM  MSG_LO_,  MUL0_LO_, MSG_LO_
+	VADDUDM  V0_LO_,   MUL0_HI_, V0_LO_
+	VADDUDM  MSG_LO_,  V1_LO_,   V1_LO_
+	VSRD     V0_HI_,   ROTATE_,  MSG_LO_
+	VADDUDM  V0_LO_,   V1_HI_,   V1_HI_
+	VPERM    V1_LO_,   V1_LO_,   MASK_, V0_LO_
+	VMULOUW  V1_LO_,   TEMP2_,   TEMP2_
+	VPERM    V1_HI_,   V1_HI_,   MASK_, TEMP7_
+	VADDUDM  V0_LO_,   TEMP1_,   V0_LO_
+	VMULOUW  V1_HI_,   MSG_LO_,  MSG_LO_
+	VADDUDM  TEMP7_,   TEMP3_,   V0_HI_
+	VPERM    V0_LO_,   V0_LO_,   MASK_, TEMP6_
+	VRLD     V1_LO_,   ROTATE_,  TEMP4_
+	VSRD     V1_HI_,   ROTATE_,  TEMP5_
+	VPERM    V0_HI_,   V0_HI_,   MASK_, TEMP7_
+	XXLXOR   MUL0_LO,  TEMP2,    MUL0_LO
+	VMULOUW  TEMP1_,   TEMP4_,   TEMP1_
+	VMULOUW  TEMP3_,   TEMP5_,   TEMP3_
+	XXLXOR   MUL0_HI,  MSG_LO,   MUL0_HI
+	XXLXOR   MUL1_LO,  TEMP1,    MUL1_LO
+	XXLXOR   MUL1_HI,  TEMP3,    MUL1_HI
+	VADDUDM  TEMP6_,   V1_LO_,   V1_LO_
+	VADDUDM  TEMP7_,   V1_HI_,   V1_HI_
 
-        WORD $0x38a5ffe0        // ADD R5, $-32, R5
-        WORD $0x28250020        // CMPLDI $32, R5
-        BGE loop
+	SUB  $32, MSG_LEN, MSG_LEN
+	CMPU MSG_LEN, $32
+	BGE  loop
+
+	// Save state
+	XXPERMDI V0_LO,   V0_LO,   $2, V0_LO
+	XXPERMDI V0_HI,   V0_HI,   $2, V0_HI
+	XXPERMDI V1_LO,   V1_LO,   $2, V1_LO
+	XXPERMDI V1_HI,   V1_HI,   $2, V1_HI
+	XXPERMDI MUL0_LO, MUL0_LO, $2, MUL0_LO
+	XXPERMDI MUL0_HI, MUL0_HI, $2, MUL0_HI
+	XXPERMDI MUL1_LO, MUL1_LO, $2, MUL1_LO
+	XXPERMDI MUL1_HI, MUL1_HI, $2, MUL1_HI
+	STXVD2X  V0_LO,   (STATE)(R0)
+	STXVD2X  V0_HI,   (STATE)(P1)
+	STXVD2X  V1_LO,   (STATE)(P2)
+	STXVD2X  V1_HI,   (STATE)(P3)
+	STXVD2X  MUL0_LO, (STATE)(P4)
+	STXVD2X  MUL0_HI, (STATE)(P5)
+	STXVD2X  MUL1_LO, (STATE)(P6)
+	STXVD2X  MUL1_HI, (STATE)(P7)
 
 complete:
-        WORD $0xF1AD6A57        // xxswapd vs45,vs45
-        WORD $0xF16B5A57        // xxswapd vs43,vs43
-        WORD $0xF0210A57        // xxswapd vs33,vs33
-        WORD $0xF0000257        // xxswapd vs32,vs32
-        WORD $0xF0421257        // xxswapd vs34,vs34
-        WORD $0xF0631A57        // xxswapd vs35,vs35
-        WORD $0xF0842257        // xxswapd vs36,vs36
-        WORD $0xF0A52A57        // xxswapd vs37,vs37
+	RET
 
-        // Save state
-        WORD $0x7DAEBF99        // stxvd2x vs45,r14,r23
-        WORD $0x7D6EC799        // stxvd2x vs43,r14,r24
-        WORD $0x7C2ECF99        // stxvd2x vs33,r14,r25
-        WORD $0x7C0ED799        // stxvd2x vs32,r14,r26
-        WORD $0x7C4EDF99        // stxvd2x vs34,r14,r27
-        WORD $0x7C6EE799        // stxvd2x vs35,r14,r28
-        WORD $0x7C8EEF99        // stxvd2x vs36,r14,r29
-        WORD $0x7CAEB799        // stxvd2x vs37,r14,r22
 
-        RET
-
-// Constants for zipper merge
+// Constants for TBL instructions
 DATA ·constants+0x0(SB)/8, $0x0000000000000020
 DATA ·constants+0x8(SB)/8, $0x0000000000000020
-DATA ·constants+0x10(SB)/8, $0x000f010e05020c03 // zipper merge constant
-DATA ·constants+0x18(SB)/8, $0x070806090d0a040b
+DATA ·constants+0x10(SB)/8, $0x000f010e05020c03  // zipper merge constant
+DATA ·constants+0x18(SB)/8, $0x070806090d0a040b  // zipper merge constant
 
 GLOBL ·constants(SB), 8, $32
-
