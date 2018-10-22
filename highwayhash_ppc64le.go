@@ -24,7 +24,7 @@ func update(state *[16]uint64, msg []byte) {
 	if useVMX {
 		updatePpc64Le(state, msg)
 	} else {
-	 	updateGeneric(state, msg)
+		updateGeneric(state, msg)
 	}
 }
 

@@ -10,6 +10,7 @@ var (
 	useSSE4 = false
 	useAVX2 = false
 	useNEON = true
+	useVMX  = false
 )
 
 //go:noescape

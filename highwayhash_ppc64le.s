@@ -40,10 +40,10 @@
 #define MSG_HI   VS41
 
 // Constants
-#define ROTATE	 VS42
+#define ROTATE   VS42
 #define ROTATE_  V10
-#define MASK	 VS43
-#define MASK_	 V11
+#define MASK     VS43
+#define MASK_    V11
 
 // Temps
 #define TEMP1    VS44

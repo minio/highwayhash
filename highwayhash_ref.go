@@ -12,6 +12,7 @@ var (
 	useSSE4 = false
 	useAVX2 = false
 	useNEON = false
+	useVMX  = false
 )
 
 func initialize(state *[16]uint64, k []byte) {
