@@ -16,6 +16,8 @@
 // limitations under the License.
 //
 
+#include "textflag.h"
+
 // Definition of registers
 #define V0_LO    VS32
 #define V0_LO_   V0
@@ -58,19 +60,19 @@
 #define TEMP7_   V18
 
 // Regular registers
-#define STATE     R2
-#define MSG_BASE  R3
-#define MSG_LEN   R4
-#define CONSTANTS R5
-#define P1        R6
-#define P2        R7
-#define P3        R8
-#define P4        R9
-#define P5        R10
-#define P6        R11
-#define P7        R12
+#define STATE     R3
+#define MSG_BASE  R4
+#define MSG_LEN   R5
+#define CONSTANTS R6
+#define P1        R7
+#define P2        R8
+#define P3        R9
+#define P4        R10
+#define P5        R11
+#define P6        R12
+#define P7        R13
 
-TEXT ·updatePpc64Le(SB), 7, $0
+TEXT ·updatePpc64Le(SB), NOFRAME|NOSPLIT, $0-32
 	MOVD state+0(FP), STATE
 	MOVD msg_base+8(FP), MSG_BASE
 	MOVD msg_len+16(FP), MSG_LEN  // length of message
@@ -109,9 +111,7 @@ TEXT ·updatePpc64Le(SB), 7, $0
 	// Load constants table pointer
 	MOVD     $·constants(SB), CONSTANTS
 	LXVD2X   (CONSTANTS)(R0), ROTATE
-	XXPERMDI ROTATE, ROTATE, $2, ROTATE
 	LXVD2X   (CONSTANTS)(P1), MASK
-	XXPERMDI MASK, MASK, $2, MASK
 	XXLNAND  MASK, MASK, MASK
 
 loop:
@@ -177,7 +177,7 @@ complete:
 // Constants for TBL instructions
 DATA ·constants+0x0(SB)/8, $0x0000000000000020
 DATA ·constants+0x8(SB)/8, $0x0000000000000020
-DATA ·constants+0x10(SB)/8, $0x000f010e05020c03  // zipper merge constant
-DATA ·constants+0x18(SB)/8, $0x070806090d0a040b  // zipper merge constant
+DATA ·constants+0x10(SB)/8, $0x070806090d0a040b  // zipper merge constant
+DATA ·constants+0x18(SB)/8, $0x000f010e05020c03  // zipper merge constant
 
 GLOBL ·constants(SB), 8, $32
