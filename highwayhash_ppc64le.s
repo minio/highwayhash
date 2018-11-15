@@ -70,7 +70,7 @@
 #define P4        R10
 #define P5        R11
 #define P6        R12
-#define P7        R13
+#define P7        R14 // avoid using R13
 
 TEXT ·updatePpc64Le(SB), NOFRAME|NOSPLIT, $0-32
 	MOVD state+0(FP), STATE
@@ -174,7 +174,7 @@ complete:
 	RET
 
 
-// Constants for TBL instructions
+// Constants table
 DATA ·constants+0x0(SB)/8, $0x0000000000000020
 DATA ·constants+0x8(SB)/8, $0x0000000000000020
 DATA ·constants+0x10(SB)/8, $0x070806090d0a040b  // zipper merge constant
