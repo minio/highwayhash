@@ -41,7 +41,7 @@ func ExampleNew() {
 	checksum := hash.Sum(nil)
 	fmt.Println(hex.EncodeToString(checksum))
 
-	// Output: 23645892b383f1bcf83e0c01e7da885499029af7512c1fd26ff3e0db4b57525a
+	// Output: ec6967846359cdad6b32ecc3f9653803eea1340bf29876215a699a539f6a7e74
 }
 
 // ExampleNew64 shows how to use HighwayHash-64 to implement a content-addressable storage.

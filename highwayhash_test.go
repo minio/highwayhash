@@ -13,9 +13,9 @@ import (
 )
 
 func TestVectors(t *testing.T) {
-	defer func(sse4, avx2, neon bool) {
-		useSSE4, useAVX2, useNEON = sse4, avx2, neon
-	}(useSSE4, useAVX2, useNEON)
+	defer func(sse4, avx2, neon, vmx bool) {
+		useSSE4, useAVX2, useNEON, useVMX = sse4, avx2, neon, vmx
+	}(useSSE4, useAVX2, useNEON, useVMX)
 
 	if useAVX2 {
 		t.Log("AVX2 version")
@@ -37,6 +37,13 @@ func TestVectors(t *testing.T) {
 		testVectors(New128, testVectors128, t)
 		testVectors(New, testVectors256, t)
 		useNEON = false
+	}
+	if useVMX {
+		t.Log("VMX version")
+		testVectors(func(key []byte) (hash.Hash, error) { return New64(key) }, testVectors64, t)
+		testVectors(New128, testVectors128, t)
+		testVectors(New, testVectors256, t)
+		useVMX = false
 	}
 	t.Log("generic version")
 	testVectors(func(key []byte) (hash.Hash, error) { return New64(key) }, testVectors64, t)
