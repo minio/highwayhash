@@ -211,7 +211,7 @@ TEXT ·finalizeSSE4(SB), 4, $0-32
 	UPDATE(t0, t1)
 
 	CMPQ CX, $8
-	JE   skipUpdate     // Just 4 rounds for 64-bit checksum
+	JE   skipUpdate // Just 4 rounds for 64-bit checksum
 
 	PSHUFD $177, v01, t0
 	PSHUFD $177, v00, t1
@@ -222,7 +222,7 @@ TEXT ·finalizeSSE4(SB), 4, $0-32
 	UPDATE(t0, t1)
 
 	CMPQ CX, $16
-	JE   skipUpdate     // 6 rounds for 128-bit checksum
+	JE   skipUpdate // 6 rounds for 128-bit checksum
 
 	PSHUFD $177, v01, t0
 	PSHUFD $177, v00, t1
@@ -255,7 +255,7 @@ skipUpdate:
 	CMPQ CX, $16
 	JE   hash128
 
-    // 256-bit checksum
+	// 256-bit checksum
 	PADDQ v00, m00
 	PADDQ v10, m10
 	PADDQ v01, m01

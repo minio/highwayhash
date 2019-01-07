@@ -2,11 +2,10 @@
 // Use of this source code is governed by a license that can be
 // found in the LICENSE file.
 
-// +build go1.8 
+// +build go1.8
 // +build amd64 !gccgo !appengine !nacl
 
 #include "textflag.h"
-
 
 DATA ·consAVX2<>+0x00(SB)/8, $0xdbe6d5d5fe4cce2f
 DATA ·consAVX2<>+0x08(SB)/8, $0xa4093822299f31d0
@@ -142,49 +141,49 @@ TEXT ·finalizeAVX2(SB), 4, $0-32
 	VMOVDQU ·zipperMergeAVX2<>(SB), Y5
 
 	VPERM2I128 $1, Y1, Y1, Y0
-	VPSHUFD $177, Y0, Y0
+	VPSHUFD    $177, Y0, Y0
 	UPDATE(Y0)
 
 	VPERM2I128 $1, Y1, Y1, Y0
-	VPSHUFD $177, Y0, Y0
+	VPSHUFD    $177, Y0, Y0
 	UPDATE(Y0)
 
 	VPERM2I128 $1, Y1, Y1, Y0
-	VPSHUFD $177, Y0, Y0
+	VPSHUFD    $177, Y0, Y0
 	UPDATE(Y0)
 
 	VPERM2I128 $1, Y1, Y1, Y0
-	VPSHUFD $177, Y0, Y0
+	VPSHUFD    $177, Y0, Y0
 	UPDATE(Y0)
 
 	CMPQ CX, $8
-	JE   skipUpdate     // Just 4 rounds for 64-bit checksum
+	JE   skipUpdate // Just 4 rounds for 64-bit checksum
 
 	VPERM2I128 $1, Y1, Y1, Y0
-	VPSHUFD $177, Y0, Y0
+	VPSHUFD    $177, Y0, Y0
 	UPDATE(Y0)
 
 	VPERM2I128 $1, Y1, Y1, Y0
-	VPSHUFD $177, Y0, Y0
+	VPSHUFD    $177, Y0, Y0
 	UPDATE(Y0)
 
 	CMPQ CX, $16
-	JE   skipUpdate     // 6 rounds for 128-bit checksum
+	JE   skipUpdate // 6 rounds for 128-bit checksum
 
 	VPERM2I128 $1, Y1, Y1, Y0
-	VPSHUFD $177, Y0, Y0
+	VPSHUFD    $177, Y0, Y0
 	UPDATE(Y0)
 
 	VPERM2I128 $1, Y1, Y1, Y0
-	VPSHUFD $177, Y0, Y0
+	VPSHUFD    $177, Y0, Y0
 	UPDATE(Y0)
 
 	VPERM2I128 $1, Y1, Y1, Y0
-	VPSHUFD $177, Y0, Y0
+	VPSHUFD    $177, Y0, Y0
 	UPDATE(Y0)
 
 	VPERM2I128 $1, Y1, Y1, Y0
-	VPSHUFD $177, Y0, Y0
+	VPSHUFD    $177, Y0, Y0
 	UPDATE(Y0)
 
 skipUpdate:
@@ -199,7 +198,7 @@ skipUpdate:
 	CMPQ CX, $16
 	JE   hash128
 
-    // 256-bit checksum
+	// 256-bit checksum
 	MOVQ 0*8(AX), R8
 	MOVQ 1*8(AX), R9
 	MOVQ 4*8(AX), R10
@@ -210,8 +209,8 @@ skipUpdate:
 	ADDQ 13*8(AX), R11
 
 	REDUCE_MOD(R8, R9, R10, R11, R12, R13, R14, R15)
-	MOVQ   R14, 0(BX)
-	MOVQ   R15, 8(BX)
+	MOVQ R14, 0(BX)
+	MOVQ R15, 8(BX)
 
 	MOVQ 2*8(AX), R8
 	MOVQ 3*8(AX), R9
@@ -223,8 +222,8 @@ skipUpdate:
 	ADDQ 15*8(AX), R11
 
 	REDUCE_MOD(R8, R9, R10, R11, R12, R13, R14, R15)
-	MOVQ   R14, 16(BX)
-	MOVQ   R15, 24(BX)
+	MOVQ R14, 16(BX)
+	MOVQ R15, 24(BX)
 	RET
 
 hash128:

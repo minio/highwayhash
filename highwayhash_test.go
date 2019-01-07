@@ -18,37 +18,42 @@ func TestVectors(t *testing.T) {
 	}(useSSE4, useAVX2, useNEON, useVMX)
 
 	if useAVX2 {
-		t.Log("AVX2 version")
-		testVectors(func(key []byte) (hash.Hash, error) { return New64(key) }, testVectors64, t)
-		testVectors(New128, testVectors128, t)
-		testVectors(New, testVectors256, t)
-		useAVX2 = false
+		t.Run("AVX2 version", func(t *testing.T) {
+			testVectors(func(key []byte) (hash.Hash, error) { return New64(key) }, testVectors64, t)
+			testVectors(New128, testVectors128, t)
+			testVectors(New, testVectors256, t)
+			useAVX2 = false
+		})
 	}
 	if useSSE4 {
-		t.Log("SSE4 version")
-		testVectors(func(key []byte) (hash.Hash, error) { return New64(key) }, testVectors64, t)
-		testVectors(New128, testVectors128, t)
-		testVectors(New, testVectors256, t)
-		useSSE4 = false
+		t.Run("SSE4 version", func(t *testing.T) {
+			testVectors(func(key []byte) (hash.Hash, error) { return New64(key) }, testVectors64, t)
+			testVectors(New128, testVectors128, t)
+			testVectors(New, testVectors256, t)
+			useSSE4 = false
+		})
 	}
 	if useNEON {
-		t.Log("NEON version")
-		testVectors(func(key []byte) (hash.Hash, error) { return New64(key) }, testVectors64, t)
-		testVectors(New128, testVectors128, t)
-		testVectors(New, testVectors256, t)
-		useNEON = false
+		t.Run("NEON version", func(t *testing.T) {
+			testVectors(func(key []byte) (hash.Hash, error) { return New64(key) }, testVectors64, t)
+			testVectors(New128, testVectors128, t)
+			testVectors(New, testVectors256, t)
+			useNEON = false
+		})
 	}
 	if useVMX {
-		t.Log("VMX version")
+		t.Run("VMX version", func(t *testing.T) {
+			testVectors(func(key []byte) (hash.Hash, error) { return New64(key) }, testVectors64, t)
+			testVectors(New128, testVectors128, t)
+			testVectors(New, testVectors256, t)
+			useVMX = false
+		})
+	}
+	t.Run("Generic version", func(t *testing.T) {
 		testVectors(func(key []byte) (hash.Hash, error) { return New64(key) }, testVectors64, t)
 		testVectors(New128, testVectors128, t)
 		testVectors(New, testVectors256, t)
-		useVMX = false
-	}
-	t.Log("generic version")
-	testVectors(func(key []byte) (hash.Hash, error) { return New64(key) }, testVectors64, t)
-	testVectors(New128, testVectors128, t)
-	testVectors(New, testVectors256, t)
+	})
 }
 
 func testVectors(NewFunc func([]byte) (hash.Hash, error), vectors []string, t *testing.T) {
