@@ -14,10 +14,17 @@ var (
 )
 
 //go:noescape
+func initializeArm64(state *[16]uint64, key []byte)
+
+//go:noescape
 func updateArm64(state *[16]uint64, msg []byte)
 
 func initialize(state *[16]uint64, key []byte) {
-	initializeGeneric(state, key)
+	if useNEON {
+		initializeArm64(state, key)
+	} else {
+		initializeGeneric(state, key)
+	}
 }
 
 func update(state *[16]uint64, msg []byte) {

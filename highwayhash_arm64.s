@@ -19,6 +19,27 @@
 // Use github.com/minio/asm2plan9s on this file to assemble ARM instructions to
 // the opcodes of their Plan9 equivalents
 
+// func initializeArm64(state *[16]uint64, key []byte)
+TEXT ·initializeArm64(SB), 7, $0
+	MOVD state+0(FP), R0
+	MOVD key_base+8(FP), R1
+
+	VLD1 (R1), [V1.S4, V2.S4]
+
+	VREV64 V1.S4, V3.S4
+	VREV64 V2.S4, V4.S4
+
+	MOVD $·constants(SB), R3
+	VLD1 (R3), [V5.S4, V6.S4, V7.S4, V8.S4]
+	VEOR V5.B16, V1.B16, V1.B16
+	VEOR V6.B16, V2.B16, V2.B16
+	VEOR V7.B16, V3.B16, V3.B16
+	VEOR V8.B16, V4.B16, V4.B16
+
+	VST1.P [V1.D2, V2.D2, V3.D2, V4.D2], 64(R0)
+	VST1   [V5.D2, V6.D2, V7.D2, V8.D2], (R0)
+	RET
+
 TEXT ·updateArm64(SB), 7, $0
 	MOVD state+0(FP), R0
 	MOVD msg_base+8(FP), R1
@@ -109,6 +130,16 @@ loop:
 
 complete:
 	RET
+
+DATA ·constants+0x00(SB)/8, $0xdbe6d5d5fe4cce2f
+DATA ·constants+0x08(SB)/8, $0xa4093822299f31d0
+DATA ·constants+0x10(SB)/8, $0x13198a2e03707344
+DATA ·constants+0x18(SB)/8, $0x243f6a8885a308d3
+DATA ·constants+0x20(SB)/8, $0x3bd39e10cb0ef593
+DATA ·constants+0x28(SB)/8, $0xc0acf169b5f18a8c
+DATA ·constants+0x30(SB)/8, $0xbe5466cf34e90c6c
+DATA ·constants+0x38(SB)/8, $0x452821e638d01377
+GLOBL ·constants(SB), 8, $64
 
 // Constants for TBL instructions
 DATA ·zipperMerge+0x0(SB)/8, $0x000f010e05020c03 // zipper merge constant
