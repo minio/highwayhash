@@ -19,26 +19,34 @@
 // Use github.com/minio/asm2plan9s on this file to assemble ARM instructions to
 // the opcodes of their Plan9 equivalents
 
-// func initializeArm64(state *[16]uint64, key []byte)
-TEXT ·initializeArm64(SB), 7, $0
-	MOVD state+0(FP), R0
-	MOVD key_base+8(FP), R1
-
-	VLD1 (R1), [V1.S4, V2.S4]
-
-	VREV64 V1.S4, V3.S4
-	VREV64 V2.S4, V4.S4
-
-	MOVD $·constants(SB), R3
-	VLD1 (R3), [V5.S4, V6.S4, V7.S4, V8.S4]
-	VEOR V5.B16, V1.B16, V1.B16
-	VEOR V6.B16, V2.B16, V2.B16
-	VEOR V7.B16, V3.B16, V3.B16
-	VEOR V8.B16, V4.B16, V4.B16
-
-	VST1.P [V1.D2, V2.D2, V3.D2, V4.D2], 64(R0)
-	VST1   [V5.D2, V6.D2, V7.D2, V8.D2], (R0)
-	RET
+#define REDUCE_MOD(x0, x1, x2, x3, tmp0, tmp1, y0, y1) \
+	MOVD $0x3FFFFFFFFFFFFFFF, tmp0 \
+	AND  tmp0, x3                  \
+	MOVD x2, y0                    \
+	MOVD x3, y1                    \
+	                               \
+	MOVD x2, tmp0                  \
+	MOVD x3, tmp1                  \
+	LSL  $1, tmp1                  \
+	LSR  $63, tmp0                 \
+	MOVD tmp1, x3                  \
+	ORR  tmp0, x3                  \
+	                               \
+	LSL  $1, x2                    \
+	                               \
+	MOVD y0, tmp0                  \
+	MOVD y1, tmp1                  \
+	LSL  $2, tmp1                  \
+	LSR  $62, tmp0                 \
+	MOVD tmp1, y1                  \
+	ORR  tmp0, y1                  \
+	                               \
+	LSL  $2, y0                    \
+	                               \
+	EOR  x0, y0                    \
+	EOR  x2, y0                    \
+	EOR  x1, y1                    \
+	EOR  x3, y1
 
 #define UPDATE(MSG1, MSG2)                  \
 	\ // Add message
@@ -91,6 +99,29 @@ TEXT ·initializeArm64(SB), 7, $0
 	VEOR V16.B16, V6.B16, V6.B16            \
 	VEOR V17.B16, V7.B16, V7.B16
 
+
+// func initializeArm64(state *[16]uint64, key []byte)
+TEXT ·initializeArm64(SB), 7, $0
+	MOVD state+0(FP), R0
+	MOVD key_base+8(FP), R1
+
+	VLD1 (R1), [V1.S4, V2.S4]
+
+	VREV64 V1.S4, V3.S4
+	VREV64 V2.S4, V4.S4
+
+	MOVD $·constants(SB), R3
+	VLD1 (R3), [V5.S4, V6.S4, V7.S4, V8.S4]
+	VEOR V5.B16, V1.B16, V1.B16
+	VEOR V6.B16, V2.B16, V2.B16
+	VEOR V7.B16, V3.B16, V3.B16
+	VEOR V8.B16, V4.B16, V4.B16
+
+	VST1.P [V1.D2, V2.D2, V3.D2, V4.D2], 64(R0)
+	VST1   [V5.D2, V6.D2, V7.D2, V8.D2], (R0)
+	RET
+
+
 TEXT ·updateArm64(SB), 7, $0
 	MOVD state+0(FP), R0
 	MOVD msg_base+8(FP), R1
@@ -133,6 +164,147 @@ loop:
 
 complete:
 	RET
+
+
+// func finalizeArm64(out []byte, state *[16]uint64)
+TEXT ·finalizeArm64(SB), 4, $0-32
+	MOVD state+24(FP), R0
+	MOVD out_base+0(FP), R1
+	MOVD out_len+8(FP), R2
+
+	// Load zipper merge constants table pointer
+	MOVD $·zipperMerge(SB), R3
+
+	// and load zipper merge constants into v28, v29, and v30
+	VLD1 (R3), [V28.B16, V29.B16, V30.B16]
+
+	VLD1.P 64(R0), [V0.D2, V1.D2, V2.D2, V3.D2]
+	VLD1   (R0), [V4.D2, V5.D2, V6.D2, V7.D2]
+	SUB    $64, R0
+
+	VREV64 V1.S4, V26.S4
+	VREV64 V0.S4, V27.S4
+	UPDATE(V26, V27)
+
+	VREV64 V1.S4, V26.S4
+	VREV64 V0.S4, V27.S4
+	UPDATE(V26, V27)
+
+	VREV64 V1.S4, V26.S4
+	VREV64 V0.S4, V27.S4
+	UPDATE(V26, V27)
+
+	VREV64 V1.S4, V26.S4
+	VREV64 V0.S4, V27.S4
+	UPDATE(V26, V27)
+
+	CMP  $8, R2
+	BEQ  skipUpdate // Just 4 rounds for 64-bit checksum
+
+	VREV64 V1.S4, V26.S4
+	VREV64 V0.S4, V27.S4
+	UPDATE(V26, V27)
+
+	VREV64 V1.S4, V26.S4
+	VREV64 V0.S4, V27.S4
+	UPDATE(V26, V27)
+
+	CMP  $16, R2
+	BEQ  skipUpdate // 6 rounds for 128-bit checksum
+
+	VREV64 V1.S4, V26.S4
+	VREV64 V0.S4, V27.S4
+	UPDATE(V26, V27)
+
+	VREV64 V1.S4, V26.S4
+	VREV64 V0.S4, V27.S4
+	UPDATE(V26, V27)
+
+	VREV64 V1.S4, V26.S4
+	VREV64 V0.S4, V27.S4
+	UPDATE(V26, V27)
+
+	VREV64 V1.S4, V26.S4
+	VREV64 V0.S4, V27.S4
+	UPDATE(V26, V27)
+
+skipUpdate:
+	// Store result
+	VST1.P [V0.D2, V1.D2, V2.D2, V3.D2], 64(R0)
+	VST1   [V4.D2, V5.D2, V6.D2, V7.D2], (R0)
+	SUB    $64, R0
+
+	CMP $8, R2
+	BEQ hash64
+	CMP $16, R2
+	BEQ hash128
+
+	// 256-bit checksum
+	MOVD 0*8(R0), R8
+	MOVD 1*8(R0), R9
+	MOVD 4*8(R0), R10
+	MOVD 5*8(R0), R11
+	MOVD 8*8(R0), R4
+	MOVD 9*8(R0), R5
+	MOVD 12*8(R0), R6
+	MOVD 13*8(R0), R7
+	ADD  R4, R8
+	ADD  R5, R9
+	ADD  R6, R10
+	ADD  R7, R11
+
+	REDUCE_MOD(R8, R9, R10, R11, R4, R5, R6, R7)
+	MOVD R6, 0(R1)
+	MOVD R7, 8(R1)
+
+	MOVD 2*8(R0), R8
+	MOVD 3*8(R0), R9
+	MOVD 6*8(R0), R10
+	MOVD 7*8(R0), R11
+	MOVD 10*8(R0), R4
+	MOVD 11*8(R0), R5
+	MOVD 14*8(R0), R6
+	MOVD 15*8(R0), R7
+	ADD  R4, R8
+	ADD  R5, R9
+	ADD  R6, R10
+	ADD  R7, R11
+
+	REDUCE_MOD(R8, R9, R10, R11, R4, R5, R6, R7)
+	MOVD R6, 16(R1)
+	MOVD R7, 24(R1)
+	RET
+
+hash128:
+	MOVD 0*8(R0), R8
+	MOVD 1*8(R0), R9
+	MOVD 6*8(R0), R10
+	MOVD 7*8(R0), R11
+	ADD R10, R8
+	ADD R11, R9
+	MOVD 8*8(R0), R10
+	MOVD 9*8(R0), R11
+	ADD R10, R8
+	ADD R11, R9
+	MOVD 14*8(R0), R10
+	MOVD 15*8(R0), R11
+	ADD R10, R8
+	ADD R11, R9
+	MOVD R8, 0(R1)
+	MOVD R9, 8(R1)
+	RET
+
+hash64:
+	MOVD 0*8(R0), R4
+	MOVD 4*8(R0), R5
+	MOVD 8*8(R0), R6
+	MOVD 12*8(R0), R7
+	ADD  R5, R4
+	ADD  R7, R6
+	ADD  R6, R4
+	MOVD R4, (R1)
+	RET
+
 
 DATA ·constants+0x00(SB)/8, $0xdbe6d5d5fe4cce2f
 DATA ·constants+0x08(SB)/8, $0xa4093822299f31d0

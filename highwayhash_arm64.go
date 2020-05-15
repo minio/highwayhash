@@ -19,6 +19,9 @@ func initializeArm64(state *[16]uint64, key []byte)
 //go:noescape
 func updateArm64(state *[16]uint64, msg []byte)
 
+//go:noescape
+func finalizeArm64(out []byte, state *[16]uint64)
+
 func initialize(state *[16]uint64, key []byte) {
 	if useNEON {
 		initializeArm64(state, key)
@@ -36,5 +39,9 @@ func update(state *[16]uint64, msg []byte) {
 }
 
 func finalize(out []byte, state *[16]uint64) {
-	finalizeGeneric(out, state)
+	if useNEON {
+		finalizeArm64(out, state)
+	} else {
+		finalizeGeneric(out, state)
+	}
 }
