@@ -40,6 +40,57 @@ TEXT ·initializeArm64(SB), 7, $0
 	VST1   [V5.D2, V6.D2, V7.D2, V8.D2], (R0)
 	RET
 
+#define UPDATE(MSG1, MSG2)                  \
+	\ // Add message
+	VADD MSG1.D2, V2.D2, V2.D2              \
+	VADD MSG2.D2, V3.D2, V3.D2              \
+	\
+	\ // v1 += mul0
+	VADD V4.D2, V2.D2, V2.D2                \
+	VADD V5.D2, V3.D2, V3.D2                \
+	\
+	\ // First pair of multiplies
+	VTBL V29.B16, [V0.B16, V1.B16], V10.B16 \
+	VTBL V30.B16, [V2.B16, V3.B16], V11.B16 \
+	\
+    \ // VUMULL  V10.S2, V11.S2, V12.D2 /* assembler support missing */
+    \ // VUMULL2 V10.S4, V11.S4, V13.D2 /* assembler support missing */
+	WORD $0x2eaac16c \ // umull  v12.2d, v11.2s, v10.2s
+	WORD $0x6eaac16d \ // umull2 v13.2d, v11.4s, v10.4s
+	\
+	\ // v0 += mul1
+	VADD V6.D2, V0.D2, V0.D2                \
+	VADD V7.D2, V1.D2, V1.D2                \
+	\
+	\ // Second pair of multiplies
+	VTBL V29.B16, [V2.B16, V3.B16], V15.B16 \
+	VTBL V30.B16, [V0.B16, V1.B16], V14.B16 \
+	\
+	\ // EOR multiplication result in
+	VEOR V12.B16, V4.B16, V4.B16            \
+	VEOR V13.B16, V5.B16, V5.B16            \
+	\
+	\ // VUMULL  V14.S2, V15.S2, V16.D2 /* assembler support missing */
+	\ // VUMULL2 V14.S4, V15.S4, V17.D2 /* assembler support missing */
+	WORD $0x2eaec1f0 \ // umull  v16.2d, v15.2s, v14.2s
+	WORD $0x6eaec1f1 \ // umull2 v17.2d, v15.4s, v14.4s
+	\
+	\ // First pair of zipper-merges
+	VTBL V28.B16, [V2.B16], V18.B16         \
+	VADD V18.D2, V0.D2, V0.D2               \
+	VTBL V28.B16, [V3.B16], V19.B16         \
+	VADD V19.D2, V1.D2, V1.D2               \
+	\
+	\ // Second pair of zipper-merges
+	VTBL V28.B16, [V0.B16], V20.B16         \
+	VADD V20.D2, V2.D2, V2.D2               \
+	VTBL V28.B16, [V1.B16], V21.B16         \
+	VADD V21.D2, V3.D2, V3.D2               \
+	\
+	\ // EOR multiplication result in
+	VEOR V16.B16, V6.B16, V6.B16            \
+	VEOR V17.B16, V7.B16, V7.B16
+
 TEXT ·updateArm64(SB), 7, $0
 	MOVD state+0(FP), R0
 	MOVD msg_base+8(FP), R1
@@ -71,55 +122,7 @@ loop:
 	// Main loop
 	VLD1.P 32(R1), [V26.S4, V27.S4]
 
-	// Add message
-	VADD V26.D2, V2.D2, V2.D2
-	VADD V27.D2, V3.D2, V3.D2
-
-	// v1 += mul0
-	VADD V4.D2, V2.D2, V2.D2
-	VADD V5.D2, V3.D2, V3.D2
-
-	// First pair of multiplies
-	VTBL V29.B16, [V0.B16, V1.B16], V10.B16
-	VTBL V30.B16, [V2.B16, V3.B16], V11.B16
-
-	// VUMULL  V10.S2, V11.S2, V12.D2 /* assembler support missing */
-	// VUMULL2 V10.S4, V11.S4, V13.D2 /* assembler support missing */
-	WORD $0x2eaac16c // umull  v12.2d, v11.2s, v10.2s
-	WORD $0x6eaac16d // umull2 v13.2d, v11.4s, v10.4s
-
-	// v0 += mul1
-	VADD V6.D2, V0.D2, V0.D2
-	VADD V7.D2, V1.D2, V1.D2
-
-	// Second pair of multiplies
-	VTBL V29.B16, [V2.B16, V3.B16], V15.B16
-	VTBL V30.B16, [V0.B16, V1.B16], V14.B16
-
-	// EOR multiplication result in
-	VEOR V12.B16, V4.B16, V4.B16
-	VEOR V13.B16, V5.B16, V5.B16
-
-	// VUMULL  V14.S2, V15.S2, V16.D2 /* assembler support missing */
-	// VUMULL2 V14.S4, V15.S4, V17.D2 /* assembler support missing */
-	WORD $0x2eaec1f0 // umull  v16.2d, v15.2s, v14.2s
-	WORD $0x6eaec1f1 // umull2 v17.2d, v15.4s, v14.4s
-
-	// First pair of zipper-merges
-	VTBL V28.B16, [V2.B16], V18.B16
-	VADD V18.D2, V0.D2, V0.D2
-	VTBL V28.B16, [V3.B16], V19.B16
-	VADD V19.D2, V1.D2, V1.D2
-
-	// Second pair of zipper-merges
-	VTBL V28.B16, [V0.B16], V20.B16
-	VADD V20.D2, V2.D2, V2.D2
-	VTBL V28.B16, [V1.B16], V21.B16
-	VADD V21.D2, V3.D2, V3.D2
-
-	// EOR multiplication result in
-	VEOR V16.B16, V6.B16, V6.B16
-	VEOR V17.B16, V7.B16, V7.B16
+	UPDATE(V26, V27)
 
 	SUBS $32, R2
 	BPL  loop
