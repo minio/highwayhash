@@ -222,13 +222,13 @@ func benchmarkSum256(size int64, b *testing.B) {
 	}
 }
 
-func BenchmarkSum256_8(b *testing.B)  { benchmarkSum256(8, b) }
-func BenchmarkSum256_16(b *testing.B) { benchmarkSum256(16, b) }
-func BenchmarkSum256_64(b *testing.B) { benchmarkSum256(64, b) }
-func BenchmarkSum256_1K(b *testing.B) { benchmarkSum256(1024, b) }
-func BenchmarkSum256_8K(b *testing.B) { benchmarkSum256(8*1024, b) }
-func BenchmarkSum256_1M(b *testing.B) { benchmarkSum256(1024*1024, b) }
-func BenchmarkSum256_5M(b *testing.B) { benchmarkSum256(5*1024*1024, b) }
+func BenchmarkSum256_8(b *testing.B)   { benchmarkSum256(8, b) }
+func BenchmarkSum256_16(b *testing.B)  { benchmarkSum256(16, b) }
+func BenchmarkSum256_64(b *testing.B)  { benchmarkSum256(64, b) }
+func BenchmarkSum256_1K(b *testing.B)  { benchmarkSum256(1024, b) }
+func BenchmarkSum256_8K(b *testing.B)  { benchmarkSum256(8*1024, b) }
+func BenchmarkSum256_1M(b *testing.B)  { benchmarkSum256(1024*1024, b) }
+func BenchmarkSum256_5M(b *testing.B)  { benchmarkSum256(5*1024*1024, b) }
 func BenchmarkSum256_10M(b *testing.B) { benchmarkSum256(10*1024*1024, b) }
 func BenchmarkSum256_25M(b *testing.B) { benchmarkSum256(25*1024*1024, b) }
 
