@@ -9,6 +9,9 @@ import (
 	"encoding/binary"
 	"encoding/hex"
 	"hash"
+	"math/rand"
+	"runtime"
+	"sync/atomic"
 	"testing"
 )
 
@@ -228,3 +231,33 @@ func BenchmarkSum256_1M(b *testing.B) { benchmarkSum256(1024*1024, b) }
 func BenchmarkSum256_5M(b *testing.B) { benchmarkSum256(5*1024*1024, b) }
 func BenchmarkSum256_10M(b *testing.B) { benchmarkSum256(10*1024*1024, b) }
 func BenchmarkSum256_25M(b *testing.B) { benchmarkSum256(25*1024*1024, b) }
+
+func benchmarkParallel(b *testing.B, size int) {
+
+	c := runtime.GOMAXPROCS(0)
+
+	var key [32]byte
+
+	rng := rand.New(rand.NewSource(0xabadc0cac01a))
+	data := make([][]byte, c)
+	for i := range data {
+		data[i] = make([]byte, size)
+		rng.Read(data[i])
+	}
+
+	b.SetBytes(int64(size))
+	b.ResetTimer()
+
+	counter := uint64(0)
+	b.RunParallel(func(pb *testing.PB) {
+		for pb.Next() {
+			index := atomic.AddUint64(&counter, 1)
+			Sum(data[int(index)%len(data)], key[:])
+		}
+	})
+}
+
+func BenchmarkParallel_1M(b *testing.B)  { benchmarkParallel(b, 1024*1024) }
+func BenchmarkParallel_5M(b *testing.B)  { benchmarkParallel(b, 5*1024*1024) }
+func BenchmarkParallel_10M(b *testing.B) { benchmarkParallel(b, 10*1024*1024) }
+func BenchmarkParallel_25M(b *testing.B) { benchmarkParallel(b, 25*1024*1024) }
