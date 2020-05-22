@@ -20,7 +20,7 @@ func ExampleNew() {
 		return
 	}
 
-	file, err := os.Open("./README.md") // specify your file here
+	file, err := os.Open("./LICENSE") // specify your file here
 	if err != nil {
 		fmt.Printf("Failed to open the file: %v", err) // add error handling
 		return
@@ -41,7 +41,7 @@ func ExampleNew() {
 	checksum := hash.Sum(nil)
 	fmt.Println(hex.EncodeToString(checksum))
 
-	// Output: 87eaaa977e049b450c92dc4fd868c32cb03f6ba81775913542308b20b759aafa
+	// Output: f4217352f920fb8d287c4948eb0d843d8c4d43b61a7c0d658f28036bd1d270b7
 }
 
 // ExampleNew64 shows how to use HighwayHash-64 to implement a content-addressable storage.
