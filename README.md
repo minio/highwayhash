@@ -92,7 +92,7 @@ More information can be found in [HashCompare](https://github.com/fwessels/HashC
 
 ### Requirements
 
-All Go versions >= 1.7 are supported. Notice that the amd64 AVX2 implementation is only available with Go 1.8 and newer.
+All Go versions >= 1.11 are supported (needed for required assembly support for the different platforms).
 
 ### Contributing
 
