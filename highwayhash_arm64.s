@@ -1,5 +1,3 @@
-//+build !noasm !appengine
-
 //
 // Minio Cloud Storage, (C) 2017 Minio, Inc.
 //
@@ -15,6 +13,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
+
+//+build !noasm,!appengine
 
 // Use github.com/minio/asm2plan9s on this file to assemble ARM instructions to
 // the opcodes of their Plan9 equivalents

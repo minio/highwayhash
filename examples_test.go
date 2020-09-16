@@ -12,6 +12,10 @@ import (
 	"os"
 )
 
+// On windows the New example may fail (produce a different hash value) - e.g.
+// if the newline character is changed from '\n' to '\r\n'. Therefore, the New
+// example uses a file with a single line.
+
 // ExampleNew shows how to use HighwayHash-256 to compute fingerprints of files.
 func ExampleNew() {
 	key, err := hex.DecodeString("000102030405060708090A0B0C0D0E0FF0E0D0C0B0A090807060504030201000") // use your own key here
@@ -20,7 +24,7 @@ func ExampleNew() {
 		return
 	}
 
-	file, err := os.Open("./LICENSE") // specify your file here
+	file, err := os.Open(".gitignore") // specify your file here
 	if err != nil {
 		fmt.Printf("Failed to open the file: %v", err) // add error handling
 		return
@@ -41,7 +45,7 @@ func ExampleNew() {
 	checksum := hash.Sum(nil)
 	fmt.Println(hex.EncodeToString(checksum))
 
-	// Output: f4217352f920fb8d287c4948eb0d843d8c4d43b61a7c0d658f28036bd1d270b7
+	// Output: 0a379f2bd8c9c1c6a501f3c327ce7efd10d98148d2c5c787d59b3171970daa65
 }
 
 // ExampleNew64 shows how to use HighwayHash-64 to implement a content-addressable storage.
