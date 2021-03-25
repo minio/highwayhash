@@ -14,6 +14,8 @@
 // limitations under the License.
 //
 
+//+build ignore
+
 //+build !noasm,!appengine
 
 // Use github.com/minio/asm2plan9s on this file to assemble ARM instructions to
