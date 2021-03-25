@@ -2,7 +2,7 @@
 // Use of this source code is governed by a license that can be
 // found in the LICENSE file.
 
-// +build noasm !amd64,!arm64,!ppc64le
+// +build noasm !amd64,!ppc64le
 
 package highwayhash
 
