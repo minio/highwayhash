@@ -197,8 +197,9 @@ func finalizeGeneric(out []byte, state *[16]uint64) {
 	}
 }
 
+// Experiments on variations left for future reference...
+/*
 func zipperMerge(v0, v1 uint64, d0, d1 *uint64) {
-	// Experiments on variations left for future reference...
 	if true {
 		// fastest. original interleaved...
 		res := v0 & (0xff << (2 * 8))
@@ -318,6 +319,7 @@ func zipperMerge(v0, v1 uint64, d0, d1 *uint64) {
 		*d1 += res
 	}
 }
+*/
 
 // reduce v = [v0, v1, v2, v3] mod the irreducible polynomial x^128 + x^2 + x
 func reduceMod(v0, v1, v2, v3 uint64) (r0, r1 uint64) {
