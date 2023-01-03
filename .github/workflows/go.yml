@@ -29,7 +29,7 @@ jobs:
       env:
         GO111MODULE: on
       run: |
-         curl -sfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.33.0
+         curl -sfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.50.1
          $(go env GOPATH)/bin/golangci-lint run --config ./.golangci.yml
          go vet ./...
   test:
