@@ -10,11 +10,11 @@ on:
 
 jobs:
   build:
-    name: Build Go ${{ matrix.go-version }}
+    name: Lint/Vet ${{ matrix.go-version }}
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        go-version: [1.18.x, 1.19.x]
+        go-version: [1.20.x]
     steps:
     - name: Set up Go ${{ matrix.go-version }}
       uses: actions/setup-go@v1
@@ -29,7 +29,7 @@ jobs:
       env:
         GO111MODULE: on
       run: |
-         curl -sfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.50.1
+         curl -sfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.51.2
          $(go env GOPATH)/bin/golangci-lint run --config ./.golangci.yml
          go vet ./...
   test:
@@ -37,7 +37,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        go-version: [1.19.x]
+        go-version: [1.18.x, 1.19.x, 1.20.x]
         os: [ubuntu-latest, windows-latest, macos-latest]
     steps:
     - name: Set up Go ${{ matrix.go-version }} on ${{ matrix.os }}
@@ -54,3 +54,4 @@ jobs:
         GO111MODULE: on
       run: |
          go test ./...
+         go test -tags=noasm ./...
