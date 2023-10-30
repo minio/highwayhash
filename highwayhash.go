@@ -57,8 +57,7 @@ func New64(key []byte) (hash.Hash64, error) {
 	if len(key) != Size {
 		return nil, errKeySize
 	}
-	h := new(digest64)
-	h.size = Size64
+	h := &digest{size: Size64}
 	copy(h.key[:], key)
 	h.Reset()
 	return h, nil
