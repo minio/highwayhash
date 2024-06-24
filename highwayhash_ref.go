@@ -11,6 +11,8 @@ var (
 	useSSE4 = false
 	useAVX2 = false
 	useNEON = false
+	useSVE  = false
+	useSVE2 = false
 	useVMX  = false
 )
 

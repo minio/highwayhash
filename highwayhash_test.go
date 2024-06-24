@@ -36,6 +36,22 @@ func TestVectors(t *testing.T) {
 			useSSE4 = false
 		})
 	}
+	if useSVE2 {
+		t.Run("SVE2 version", func(t *testing.T) {
+			testVectors(func(key []byte) (hash.Hash, error) { return New64(key) }, testVectors64, t)
+			testVectors(New128, testVectors128, t)
+			testVectors(New, testVectors256, t)
+			useSVE2 = false
+		})
+	}
+	if useSVE {
+		t.Run("SVE version", func(t *testing.T) {
+			testVectors(func(key []byte) (hash.Hash, error) { return New64(key) }, testVectors64, t)
+			testVectors(New128, testVectors128, t)
+			testVectors(New, testVectors256, t)
+			useSVE = false
+		})
+	}
 	if useNEON {
 		t.Run("NEON version", func(t *testing.T) {
 			testVectors(func(key []byte) (hash.Hash, error) { return New64(key) }, testVectors64, t)
