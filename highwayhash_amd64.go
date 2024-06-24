@@ -13,6 +13,8 @@ var (
 	useSSE4 = cpu.X86.HasSSE41
 	useAVX2 = cpu.X86.HasAVX2
 	useNEON = false
+	useSVE  = false
+	useSVE2 = false
 	useVMX  = false
 )
 
