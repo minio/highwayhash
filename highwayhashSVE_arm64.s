@@ -80,6 +80,49 @@ completeSve:
     RET
 
 TEXT ·updateArm64Sve2(SB), NOSPLIT, $0
+    MOVD state+0(FP), R0
+    MOVD msg_base+8(FP), R1
+    MOVD msg_len+16(FP), R2 // length of message
+    SUBS $32, R2
+    BMI  completeSve2
+
+    WORD $0x2518e3e1 // ptrue p1.b
+    WORD $0xa5e0a401 // ld1d  z1.d, p1/z, [x0]
+    WORD $0xa5e1a402 // ld1d  z2.d, p1/z, [x0, #1, MUL VL]
+    WORD $0xa5e2a403 // ld1d  z3.d, p1/z, [x0, #2, MUL VL]
+    WORD $0xa5e3a404 // ld1d  z4.d, p1/z, [x0, #3, MUL VL]
+
+    // Load zipper merge constants table pointer
+    MOVD $·zipperMergeSve(SB), R3
+    WORD $0xa5e0a465 // ld1d  z5.d, p1/z, [x3]
+
+loopSve2:
+    WORD $0xa5e0a420 // ld1d  z0.d, p1/z, [x1]
+    ADD  $32, R1
+
+    WORD $0x04e00042 // add z2.d, z2.d, z0.d
+    WORD $0x04e30042 // add z2.d, z2.d, z3.d
+    WORD $0x04e09420 // lsr z0.d, z1.d, #32
+    WORD $0x45c27800 // umullb z0.d, z0.s, z2.s
+    WORD $0x04a33003 // eor z3.d, z0.d, z3.d
+    WORD $0x04e10081 // add z1.d, z4.d, z1.d
+    WORD $0x04e09440 // lsr z0.d, z2.d, #32
+    WORD $0x45c17800 // umullb z0.d, z0.s, z1.s
+    WORD $0x04a43004 // eor z4.d, z0.d, z4.d
+    WORD $0x05253040 // tbl z0.b, z2.b, z5.b
+    WORD $0x04e00021 // add z1.d, z1.d, z0.d
+    WORD $0x05253020 // tbl z0.b, z1.b, z5.b
+    WORD $0x04e00042 // add z2.d, z2.d, z0.d
+
+    SUBS $32, R2
+    BPL  loopSve2
+
+    WORD $0xe5e0e401 // st1d z1.d, p1, [x0]
+    WORD $0xe5e1e402 // st1d z2.d, p1, [x0, #1, MUL VL]
+    WORD $0xe5e2e403 // st1d z3.d, p1, [x0, #2, MUL VL]
+    WORD $0xe5e3e404 // st1d z4.d, p1, [x0, #3, MUL VL]
+
+completeSve2:
     RET
 
 DATA ·zipperMergeSve+0x00(SB)/8, $0x000f010e05020c03
