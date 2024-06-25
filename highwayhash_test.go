@@ -51,7 +51,7 @@ func TestUpdateFunc(t *testing.T) {
 		msg[i] = 0x33 + byte(i)
 	}
 
-	updateArm64Sve(&state, msg)
+	updateGeneric(&state, msg)
 
 	buf := bytes.Buffer{}
 	buf.WriteString(fmt.Sprintf("0x%016x - 0x%016x\n", state[0], state[1]))
