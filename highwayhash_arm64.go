@@ -16,7 +16,7 @@ var (
 	useAVX2 = false
 	useNEON = cpu.ARM64.HasASIMD
 	useSVE  = cpu.ARM64.HasSVE
-	useSVE2 = cpu.ARM64.HasSVE2
+	useSVE2 = false // cpu.ARM64.HasSVE2 -- disable until tested on real hardware
 	useVMX  = false
 )
 
