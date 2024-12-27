@@ -81,7 +81,7 @@ func ExampleNew64() {
 	lookupMap := make(map[uint64]string, len(dir))
 	for _, file := range dir {
 		if file.IsDir() {
-			continue // skip sub-directroies in our example
+			continue // skip sub-directories in our example
 		}
 		address, err := AddressOf(key, file.Name())
 		if err != nil {
